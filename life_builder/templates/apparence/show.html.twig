@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Apparence{% endblock %}
+
+{% block body %}
+    <h1>Apparence</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ apparence.id }}</td>
+            </tr>
+            <tr>
+                <th>OrdreAffichage</th>
+                <td>{{ apparence.ordreAffichage }}</td>
+            </tr>
+            <tr>
+                <th>Titre</th>
+                <td>{{ apparence.titre }}</td>
+            </tr>
+            <tr>
+                <th>Images</th>
+                <td>{{ apparence.images ? apparence.images|json_encode : '' }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ apparence.description }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_personnage_index') }}">back to list</a>
+
+    <a href="{{ path('app_apparence_edit', {'id': apparence.id}) }}">edit</a>
+
+    {{ include('apparence/_delete_form.html.twig') }}
+{% endblock %}

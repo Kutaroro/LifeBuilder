@@ -1,0 +1,10 @@
+{{ form_start(form) }}
+    {{ form_widget(form.description) }}
+    
+    <button class="btn">{{ button_label|default('Save') }}</button>
+    <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        onclick="toggleForm('form-commentaire')">
+                    Annuler
+    </button>
+{{ form_end(form) }}

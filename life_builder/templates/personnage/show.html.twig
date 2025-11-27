@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Personnage{% endblock %}
+
+{% block body %}
+    <h1>Personnage</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ personnage.id }}</td>
+            </tr>
+            <tr>
+                <th>Nom</th>
+                <td>{{ personnage.nom }}</td>
+            </tr>
+            <tr>
+                <th>Image</th>
+                <td>{{ personnage.image }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <h2>Histoires</h2>
+        <a href="{{ path('app_histoire_new', {'id': personnage.id}) }}">créer une histoire</a>
+        <br/><br/>
+
+        {% for item in histoires %}
+            <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                <div>
+                    <strong>{{ item.titre }}</strong> 
+                    <button type="button" class="btn btn-sm btn-primary" onclick="toggleForm('form-histoire{{ item.id }}')">
+                        Modifier l'ordre
+                    </button>
+                </div>
+                <p>{{ item.description }}</p>
+
+                <!-- Formulaire caché -->
+                <form id="form-histoire{{ item.id }}" 
+                      action="{{ path('app_personnage_histoire_ordre', {'personnageId': personnage.id, 'histoireId': item.id}) }}" 
+                      method="POST"
+                      style="display: none; margin-top: 10px; padding: 10px; background-color: #f5f5f5;">
+                    <label for="ordreAffichage-{{ item.id }}">Nouvel ordre d'affichage:</label>
+                    <input type="number" id="ordreAffichage-{{ item.id }}" name="ordreAffichage" min="1" required />
+                    <button type="submit" class="btn btn-success btn-sm">Valider</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleForm('form-histoire{{ item.id }}')">Annuler</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+
+     <div>
+        <h2>Apparences</h2>
+        <a href="{{ path('app_apparence_new', {'id': personnage.id}) }}">créer une apparence</a>
+        <br/><br/>
+
+        {% for item in apparences %}
+            <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                <div>
+                    <strong>{{ item.titre }}</strong> 
+                    <button type="button" class="btn btn-sm btn-primary" onclick="toggleForm('form-apparence{{ item.id }}')">
+                        Modifier l'ordre
+                    </button>
+                </div>
+                <p>{{ item.description }}</p>
+                {% for image in item.images %}
+                    {{image}}
+                {% endfor %}
+                
+
+                <!-- Formulaire caché -->
+                <form id="form-apparence{{ item.id }}" 
+                      action="{{ path('app_personnage_apparence_ordre', {'personnageId': personnage.id, 'apparenceId': item.id}) }}" 
+                      method="POST"
+                      style="display: none; margin-top: 10px; padding: 10px; background-color: #f5f5f5;">
+                    <label for="ordreAffichage-{{ item.id }}">Nouvel ordre d'affichage:</label>
+                    <input type="number" id="ordreAffichage-{{ item.id }}" name="ordreAffichage" min="1" required />
+                    <button type="submit" class="btn btn-success btn-sm">Valider</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleForm('form-apparence{{ item.id }}')">Annuler</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+
+
+    <div>
+        <h2>Commentaires</h2>
+        <button type="button" class="btn btn-sm btn-primary" onclick="toggleForm('form-commentaire')">
+                        Ajouter un commentaire
+        </button>
+
+
+        <div id="form-commentaire"
+            style="display:none; margin-top:10px; padding:10px; background-color:#f5f5f5;">
+             {{ include('commentaire/_form.html.twig') }}
+        </div>
+        {% for commentaire in personnage.commentaires %}
+            {% if not commentaire.commentaire %}
+                <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                    <strong>{{ commentaire.utilisateur.nom }}</strong>
+                    <p>{{ commentaire.description }}</p>
+                    <small>{{ commentaire.date|date('d/m/Y H:i') }}</small>
+            {% set content %}
+            {{ include('commentaire/_formReponse.html.twig') }}
+            {% endset %}
+
+                   
+                </div>
+            {% endif %}
+        {% endfor %}
+
+    </div>
+
+
+    <hr/>
+    <a href="{{ path('app_personnage_index') }}">back to list</a>
+    <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}">edit</a>
+
+    {{ include('personnage/_delete_form.html.twig') }}
+
+    <script>
+        function toggleForm(formId,isAnswer=false) {
+            const form = document.getElementById(formId);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+    </script>
+
+{% endblock %}

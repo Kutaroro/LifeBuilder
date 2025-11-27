@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Apparence index{% endblock %}
+
+{% block body %}
+    <h1>Apparence index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>OrdreAffichage</th>
+                <th>Titre</th>
+                <th>Images</th>
+                <th>Description</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for apparence in apparences %}
+            <tr>
+                <td>{{ apparence.id }}</td>
+                <td>{{ apparence.ordreAffichage }}</td>
+                <td>{{ apparence.titre }}</td>
+                <td>{{ apparence.images ? apparence.images|json_encode : '' }}</td>
+                <td>{{ apparence.description }}</td>
+                <td>
+                    <a href="{{ path('app_apparence_show', {'id': apparence.id}) }}">show</a>
+                    <a href="{{ path('app_apparence_edit', {'id': apparence.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_apparence_new') }}">Create new</a>
+{% endblock %}
