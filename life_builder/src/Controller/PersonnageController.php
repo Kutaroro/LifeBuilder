@@ -76,19 +76,22 @@ final class PersonnageController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $commentaireId = (int) $form->get('commentaire')->getData();
+            $commentaireParent = $entityManager->getRepository(Commentaire::class)->find($commentaireId);
+            dump($commentaireParent);
+            if ($commentaireParent) {
+                $commentaire->setCommentaire($commentaireParent);
+                $commentaireParent->addReponse($commentaire);
+            }
             $commentaire->setPersonnage($personnage);
             $commentaire->setUtilisateur($this->getUser());
             $commentaire->setDate(new \DateTimeImmutable());
             $entityManager->persist($commentaire);
             $entityManager->flush();
-
-           
-           
-
             return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
-        }
-        
 
+        }
+       
 
         return $this->render('personnage/show.html.twig', [
             'personnage' => $personnage,

@@ -17,9 +17,12 @@ class ReponseType extends AbstractType
     {
         $builder
             ->add('description')
-            ->add('commentaire', HiddenType::class, [
-            'mapped' => false,
-            'required' => false,])
+            ->add('commentaire', EntityType::class, [
+                'class' => Commentaire::class,
+                'choice_label' => 'description',
+                'placeholder' => 'Sélectionner un commentaire parent (optionnel)',
+                'required' => false,
+            ])
         ;
     }
 

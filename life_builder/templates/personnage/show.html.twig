@@ -102,9 +102,13 @@
                     <strong>{{ commentaire.utilisateur.nom }}</strong>
                     <p>{{ commentaire.description }}</p>
                     <small>{{ commentaire.date|date('d/m/Y H:i') }}</small>
-            {% set content %}
+                    <button type="button" class="btn btn-sm btn-primary" onclick="toggleForm('form-commentaire')">
+                        Répondre
+        </button>
+        <div id="form-commentaire"
+            style="display:none; margin-top:10px; padding:10px; background-color:#f5f5f5;">
             {{ include('commentaire/_formReponse.html.twig') }}
-            {% endset %}
+        </div>
 
                    
                 </div>

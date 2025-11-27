@@ -1,5 +1,10 @@
 {{ form_start(form) }}
-    {{ form_widget(form.description) }}
+    <input type="hidden" name="commentaire_id" value="{{ commentaire.id }}">
+    <input
+        name="{{ field_name(form.description) }}"
+        type="text"
+        value="{{ form.description.vars.value|e }}"
+    >
     
     <button class="btn">{{ button_label|default('Save') }}</button>
     <button type="button"

@@ -17,6 +17,9 @@ class CommentaireType extends AbstractType
     {
         $builder
             ->add('description')
+            ->add('commentaire', HiddenType::class, [
+    'mapped' => false,
+]);
         ;
     }
 
