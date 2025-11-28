@@ -70,7 +70,7 @@ final class PersonnageController extends AbstractController
             return $av <=> $bv;
         });
 
-
+        // Commentaires 
         $commentaire = new Commentaire();
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $formReponse = $this->createForm(CommentaireType::class, $commentaire);
@@ -80,7 +80,7 @@ final class PersonnageController extends AbstractController
             $commentaireParent = null;
             $commentaireID = $request->request->getInt('commentaireID');
 
-
+            // Si un ID de commentaire parent est fourni, c'est une réponse
             if ($commentaireID) {
                 $commentaireParent = $entityManager->getRepository(Commentaire::class)->find($commentaireID);
                 if ($commentaireParent) {
@@ -99,10 +99,21 @@ final class PersonnageController extends AbstractController
             return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
 
         }
+
+        $personnagesPublics = $entityManager->getRepository(Personnage::class)
+            ->createQueryBuilder('p')
+            ->andWhere('p.isPublic = :public')
+            ->andWhere('p.id != :id')
+            ->setParameter('public', true)
+            ->setParameter('id', $personnage->getId())
+            ->orderBy('p.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
        
 
         return $this->render('personnage/show.html.twig', [
             'personnage' => $personnage,
+            'personnagesPublics' => $personnagesPublics,
             'form'=>$form,
             'formR'=>$formReponse,
             'apparences'=>$apparences,
@@ -142,6 +153,27 @@ final class PersonnageController extends AbstractController
 
 
 //================================= Méthodes persos =================================//
+
+    #[Route('/personnageLie', name: 'app_add_persoLie', methods: ['POST'])]
+    public function addPersoLie(Request $request, EntityManagerInterface $em): Response
+    {
+        $personnageId = $request->request->getInt('personnageId'); // ID du personnage actuel
+        $persoLieId = $request->request->getInt('persoLies');     // ID du personnage lié sélectionné
+
+        $personnage = $em->getRepository(Personnage::class)->find($personnageId);
+        $personnageLi = $em->getRepository(Personnage::class)->find($persoLieId);
+
+        if ($personnage && $personnageLi) {
+            $personnage->addPersoLy($personnageLi);
+            $em->persist($personnage);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('app_personnage_show', ['id' => $personnageId]);
+    }
+
+
+
 
     //Permet de reorganiser la liste si l'utilisateur change l'ordre d'affichage 
     public function reorganisation(Personnage $personnage, HistoireRepository $histoireRepository, EntityManagerInterface $em): void
@@ -201,7 +233,7 @@ final class PersonnageController extends AbstractController
         HistoireRepository $histoireRepository,
         EntityManagerInterface $entityManager
     ): Response {
-        $personnage = $personnageRepository->find($personnageId);
+        $personnage = $personnageRepository->findOneBy(['id' => $personnageId]);
         if (!$personnage) {
             throw $this->createNotFoundException('Personnage not found');
         }
