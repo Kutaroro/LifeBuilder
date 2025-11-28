@@ -154,14 +154,14 @@ final class PersonnageController extends AbstractController
 
 //================================= Méthodes persos =================================//
 
-    #[Route('/personnageLie', name: 'app_add_persoLie', methods: ['POST'])]
+    #[Route('/personnageLie/ajout', name: 'app_add_persoLie', methods: ['POST'])]
     public function addPersoLie(Request $request, EntityManagerInterface $em): Response
     {
         $personnageId = $request->request->getInt('personnageId'); // ID du personnage actuel
         $persoLieId = $request->request->getInt('persoLies');     // ID du personnage lié sélectionné
 
-        $personnage = $em->getRepository(Personnage::class)->find($personnageId);
-        $personnageLi = $em->getRepository(Personnage::class)->find($persoLieId);
+        $personnage = $em->getRepository(Personnage::class)->findOneBy(['id' => $personnageId]);
+        $personnageLi = $em->getRepository(Personnage::class)->findOneBy(['id' => $persoLieId]);
 
         if ($personnage && $personnageLi) {
             $personnage->addPersoLy($personnageLi);

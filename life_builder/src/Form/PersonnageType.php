@@ -17,18 +17,8 @@ class PersonnageType extends AbstractType
             ->add('nom')
             ->add('image')
             ->add('isPublic')
-            ->add('persoLies', EntityType::class, [
-                'class' => Personnage::class,
-                'choice_label' => 'id',
-                'multiple' => true,
-                'required' => false,
-            ])
-            ->add('personnagesLies', EntityType::class, [
-                'class' => Personnage::class,
-                'choice_label' => 'id',
-                'multiple' => true,
-                'required' => false,
-            ])
+            ->add('description')
+
            
         ;
     }
