@@ -13,6 +13,5 @@ Les utilisateurs pourront aussi utiliser des catégories (tels que l'univers du 
 Enfin, les utilisateurs pourront rendre leurs personnages publics et les partager et commenter sur les pages des autres utilisateurs.  
 
 Diagramme UML: https://www.figma.com/board/3DCMfzPHGoC6asbxm1AFMN/UMLLifeBuilder?node-id=0-1&t=YzoSViaSo6XZLThc-1
-Maquette : https://www.figma.com/design/uBSlsWzSc8Qlvsi7lyFAg0/LifeBuilder?node-id=0-1&t=TDX8wmZq05W0SriS-1
 
-Woah on peut pas voir le contenu du dossier faut que j'arrange ça :(
+Maquette : https://www.figma.com/design/uBSlsWzSc8Qlvsi7lyFAg0/LifeBuilder?node-id=0-1&t=TDX8wmZq05W0SriS-1
