@@ -96,6 +96,7 @@ final class PersonnageController extends AbstractController
         return $this->render('personnage/show.html.twig', [
             'personnage' => $personnage,
             'form'=>$form,
+            'formR'=>$form, // Deux form sinon ça fait une erreur pour CRSF
             'apparences'=>$apparences,
             'histoires'=>$histoires,
             

@@ -12,10 +12,6 @@
                 <td>{{ commentaire.id }}</td>
             </tr>
             <tr>
-                <th>Titre</th>
-                <td>{{ commentaire.titre }}</td>
-            </tr>
-            <tr>
                 <th>Description</th>
                 <td>{{ commentaire.description }}</td>
             </tr>
@@ -26,7 +22,7 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_commentaire_index') }}">back to list</a>
+    <a href="{{ path('app_personnage_index') }}">back to list</a>
 
     <a href="{{ path('app_commentaire_edit', {'id': commentaire.id}) }}">edit</a>
 
