@@ -53,7 +53,7 @@ final class PersonnageController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_personnage_show', methods: ['GET','POST'])]
-    public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager, int $id): Response
+    public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
     {   
         // Trie des histoires par ordre d'affichage (Valeur nulle à la fin)
         $histoires = $personnage->getHistoires()->toArray();
@@ -73,12 +73,20 @@ final class PersonnageController extends AbstractController
 
         $commentaire = new Commentaire();
         $form = $this->createForm(CommentaireType::class, $commentaire);
+        $formReponse = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
-
+        $formReponse->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $commentaireId = (int) $form->get('commentaire')->getData();
-            $commentaireParent = $entityManager->getRepository(Commentaire::class)->find($commentaireId);
-            dump($commentaireParent);
+            $commentaireParent = null;
+            $commentaireID = $request->request->getInt('commentaireID');
+
+
+            if ($commentaireID) {
+                $commentaireParent = $entityManager->getRepository(Commentaire::class)->find($commentaireID);
+                if ($commentaireParent) {
+                    $commentaire->setCommentaire($commentaireParent);
+                }
+            }   
             if ($commentaireParent) {
                 $commentaire->setCommentaire($commentaireParent);
                 $commentaireParent->addReponse($commentaire);
@@ -96,7 +104,7 @@ final class PersonnageController extends AbstractController
         return $this->render('personnage/show.html.twig', [
             'personnage' => $personnage,
             'form'=>$form,
-            'formR'=>$form, // Deux form sinon ça fait une erreur pour CRSF
+            'formR'=>$formReponse,
             'apparences'=>$apparences,
             'histoires'=>$histoires,
             
