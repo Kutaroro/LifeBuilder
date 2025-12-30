@@ -204,7 +204,7 @@
                 <div class="p-4 bg-gray-50 border rounded shadow-sm">
                     
                     <div class="font-bold text-gray-900">
-                        {{ commentaire.utilisateur.nom }}
+                        {{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}
                     </div>
 
                     <p class="mt-1 text-gray-700">

@@ -23,11 +23,21 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 final class PersonnageController extends AbstractController
 {
     #[Route(name: 'app_personnage_index', methods: ['GET'])]
-    public function index(PersonnageRepository $personnageRepository, HistoireRepository $histoireRepository, EntityManagerInterface $entityManager): Response
+    public function index(PersonnageRepository $personnageRepository): Response
     {   
         return $this->render('personnage/index.html.twig', [
             'personnages' => $personnageRepository->findBy(
             ['utilisateur' => $this->getUser()]),
+        ]);
+    }
+
+    #[Route('/catalogue', name: 'app_personnage_catalogue', methods: ['GET'])]
+    public function catalogue(PersonnageRepository $personnageRepository): Response
+    {   
+        $personnages = $personnageRepository->findAll();
+        return $this->render('personnage/catalogue.html.twig', [
+            'personnages' => $personnages,
+            'utilisateur' => $this->getUser(),
         ]);
     }
 
