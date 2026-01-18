@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Commentaire;
 use App\Entity\Personnage;
 use App\Entity\Histoire;
+use App\Entity\Utilisateur;
 use App\Form\CommentaireType;
 use App\Form\PersonnageType;
 use App\Form\ReponseType;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormFactoryInterface;
 
 #[Route('/personnage')]
 final class PersonnageController extends AbstractController
@@ -63,7 +65,7 @@ final class PersonnageController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_personnage_show', methods: ['GET','POST'])]
-    public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
+    public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager, FormFactoryInterface $formFactory): Response
     {   
         // Trie des histoires par ordre d'affichage (Valeur nulle à la fin)
         $histoires = $personnage->getHistoires()->toArray();
@@ -80,35 +82,48 @@ final class PersonnageController extends AbstractController
             return $av <=> $bv;
         });
 
-        // Commentaires 
-        $commentaire = new Commentaire();
-        $form = $this->createForm(CommentaireType::class, $commentaire);
-        $formReponse = $this->createForm(CommentaireType::class, $commentaire);
-        $form->handleRequest($request);
-        $formReponse->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $commentaireParent = null;
-            $commentaireID = $request->request->getInt('commentaireID');
+        $commentaires= $personnage->getCommentaires()->toArray();
 
-            // Si un ID de commentaire parent est fourni, c'est une réponse
-            if ($commentaireID) {
-                $commentaireParent = $entityManager->getRepository(Commentaire::class)->find($commentaireID);
-                if ($commentaireParent) {
-                    $commentaire->setCommentaire($commentaireParent);
-                }
-            }   
-            if ($commentaireParent) {
-                $commentaire->setCommentaire($commentaireParent);
-                $commentaireParent->addReponse($commentaire);
-            }
+        // 1. Formulaire pour un nouveau commentaire (Parent)
+        $commentaire = new Commentaire();
+        $form = $formFactory->createNamed('base_comment', CommentaireType::class, $commentaire);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $commentaire->setPersonnage($personnage);
             $commentaire->setUtilisateur($this->getUser());
             $commentaire->setDate(new \DateTimeImmutable());
             $entityManager->persist($commentaire);
             $entityManager->flush();
-            return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
 
+            return $this->redirectToRoute('app_personnage_show', ['id' => $personnage->getId()]);
         }
+
+        // 2. Formulaire pour une réponse
+        $reponseObj = new Commentaire();
+        $formReponse = $formFactory->createNamed('reply_comment', CommentaireType::class, $reponseObj);
+        $formReponse->handleRequest($request);
+
+        if ($formReponse->isSubmitted() && $formReponse->isValid()) {
+            // On récupère l'ID du parent envoyé via le champ caché du JS
+            $parentID = $request->request->get('commentaireID'); 
+            $parent = $entityManager->getRepository(Commentaire::class)->find($parentID);
+
+            if ($parent) {
+                $mentionnedUser = $parent->getUtilisateur();
+                $reponseObj->setMentionedUtilisateur($mentionnedUser);
+                $reponseObj->setCommentaire($parent);
+                $reponseObj->setPersonnage($personnage);
+                $reponseObj->setUtilisateur($this->getUser());
+                $reponseObj->setDate(new \DateTimeImmutable());
+                
+                $entityManager->persist($reponseObj);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('app_personnage_show', ['id' => $personnage->getId()]);
+        }
+            
 
         $personnagesPublics = $entityManager->getRepository(Personnage::class)
             ->createQueryBuilder('p')
@@ -128,7 +143,8 @@ final class PersonnageController extends AbstractController
             'formR'=>$formReponse,
             'apparences'=>$apparences,
             'histoires'=>$histoires,
-            
+            'commentaires'=>$commentaires,
+
         ]);
     }
 

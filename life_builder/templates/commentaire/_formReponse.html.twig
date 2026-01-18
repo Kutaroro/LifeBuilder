@@ -1,16 +1,5 @@
-{{ form_start(formR)}}
-    <input type="hidden" name="commentaireID" value="{{ commentaire.id }}">
-
-    <input
-        name="{{ field_name(formR.description) }}"
-        type="text"
-        value="{{ formR.description.vars.value|e }}"
-    >
-    <button class="btn">{{ button_label|default('Save') }}</button>
-    <button type="button"
-                        class="btn btn-secondary btn-sm"
-                        onclick="toggleForm('form-commentaire')">
-                    Annuler
-    </button>
-    
+{{ form_start(formR, {'attr': {'id': 'form-reponse-unique'}}) }}
+    <input type="hidden" name="parent_id" id="parent-id-input" value="">
+    {{ form_widget(formR) }}
+    <button class="btn btn-primary">Répondre</button>
 {{ form_end(formR) }}

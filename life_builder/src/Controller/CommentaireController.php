@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Commentaire;
+use App\Entity\Personnage;
 use App\Form\CommentaireType;
 use App\Repository\CommentaireRepository;
 use App\Repository\PersonnageRepository;
@@ -30,45 +31,113 @@ final class CommentaireController extends AbstractController
     //     $form = $this->createForm(CommentaireType::class, $commentaire);
     //     $form->handleRequest($request);
 
+    //     $personnage=$personnageRepository->findOneBy(['id' => $id]);
+    //     $personnagesPublics = $entityManager->getRepository(Personnage::class)
+    //         ->createQueryBuilder('p')
+    //         ->andWhere('p.isPublic = :public')
+    //         ->andWhere('p.id != :id')
+    //         ->setParameter('public', true)
+    //         ->setParameter('id', $personnage->getId())
+    //         ->orderBy('p.nom', 'ASC')
+    //         ->getQuery()
+    //         ->getResult();
+
     //     if ($form->isSubmitted() && $form->isValid()) {
-    //         $personnage=$personnageRepository->findOneBy(['id' => $id]);
     //         $commentaire->setPersonnage($personnage);
     //         $commentaire->setUtilisateur($this->getUser());
     //         $commentaire->setDate(new \DateTimeImmutable());
     //         $entityManager->persist($commentaire);
     //         $entityManager->flush();
+    //         var_dump("Commentaire crée");
 
     //         return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
     //     }
 
+    //     // Trie des histoires par ordre d'affichage (Valeur nulle à la fin)
+    //     $histoires = $personnage->getHistoires()->toArray();
+    //     usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
+    //         $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         return $av <=> $bv;
+    //     });
+
+    //     $apparences = $personnage->getApparences()->toArray();
+    //     usort($apparences, function($a, $b) { 
+    //         $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         return $av <=> $bv;
+    //     });
+
+    //     $commentaires= $personnage->getCommentaires()->toArray();
+
     //     return $this->render('personnage/show.html.twig', [
     //         'commentaire' => $commentaire,
-    //         'formC' => $form,
+    //         'personnage'=>$personnage,
+    //         'personnagesPublics'=>$personnagesPublics,
+    //         'histoires'=>$histoires,
+    //         'apparences'=>$apparences,
+    //         'commentaires'=>$commentaires,
+    //         'form'=>$form,
     //     ]);
     // }
 
-    #[Route('/{id}/repondre', name: 'app_commentaire_repondre', methods: ['GET', 'POST'])]
-    public function repondre(Request $request, Commentaire $parentCommentaire, EntityManagerInterface $entityManager): Response
-    {
-        $reponse = new Commentaire();
-        $form = $this->createForm(CommentaireType::class, $reponse);
-        $form->handleRequest($request);
+    // #[Route('/{id}/repondre', name: 'app_commentaire_repondre', methods: ['GET', 'POST'])]
+    // public function repondre(Request $request,int $id, EntityManagerInterface $entityManager, CommentaireRepository $commentaireRepository): Response
+    // {
+    //     $commentaire=$commentaireRepository->findOneBy(['id' => $id]);
+    //     $personnage=$commentaire->getPersonnage();
+    //     $reponse = new Commentaire();
+    //     $form = $this->createForm(CommentaireType::class, $reponse);
+    //     $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $reponse->setPersonnage($parentCommentaire->getPersonnage());
-            $reponse->setCommentaire($parentCommentaire);
-            $reponse->setDate(new \DateTimeImmutable());
-            $entityManager->persist($reponse);
-            $entityManager->flush();
+    //     if ($form->isSubmitted() && $form->isValid()) {
+    //         $reponse->setPersonnage($personnage);
+    //         $reponse->setCommentaire($commentaire);
+    //         $reponse->setMentionedUtilisateur($commentaire->getUtilisateur());
+    //         $reponse->setDate(new \DateTimeImmutable());
+    //         $entityManager->persist($reponse);
+    //         $entityManager->flush();
 
-            return $this->redirectToRoute('app_personnage_show', ['id' => $parentCommentaire->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
-        }
+    //         return $this->redirectToRoute('app_personnage_show', ['id' => $commentaire->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
+    //     }
 
-        return $this->render('personnage/show.html.twig', [
-            'commentaire' => $reponse,
-            'formR' => $form,
-        ]);
-    }
+    //     // Trie des histoires par ordre d'affichage (Valeur nulle à la fin)
+    //     $histoires = $personnage->getHistoires()->toArray();
+    //     usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
+    //         $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         return $av <=> $bv;
+    //     });
+
+    //     $apparences = $personnage->getApparences()->toArray();
+    //     usort($apparences, function($a, $b) { 
+    //         $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+    //         return $av <=> $bv;
+    //     });
+
+    //     $commentaires= $personnage->getCommentaires()->toArray();
+
+
+    //     $personnagesPublics = $entityManager->getRepository(Personnage::class)
+    //         ->createQueryBuilder('p')
+    //         ->andWhere('p.isPublic = :public')
+    //         ->andWhere('p.id != :id')
+    //         ->setParameter('public', true)
+    //         ->setParameter('id', $personnage->getId())
+    //         ->orderBy('p.nom', 'ASC')
+    //         ->getQuery()
+    //         ->getResult();
+
+    //     return $this->render('personnage/show.html.twig', [
+    //         'personnage'=>$personnage,
+    //         'personnagesPublics'=>$personnagesPublics,
+    //         'histoires'=>$histoires,
+    //         'apparences'=>$apparences,
+    //         'commentaires'=>$commentaires,
+    //         'form'=>$form,
+    //     ]);
+    // }
 
     #[Route('/{id}', name: 'app_commentaire_show', methods: ['GET'])]
     public function show(Commentaire $commentaire): Response

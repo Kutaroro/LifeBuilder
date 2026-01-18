@@ -33,8 +33,11 @@ class Commentaire
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'commentaire')]
     private Collection $reponses;
 
-    #[ORM\ManyToOne(inversedBy: 'commentaires')]
+    #[ORM\ManyToOne]
     private ?Utilisateur $utilisateur = null;
+
+    #[ORM\ManyToOne]
+    private ?Utilisateur $mentionedUser = null;
 
     public function __construct()
     {
@@ -132,6 +135,18 @@ class Commentaire
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    public function getMentionedUtilisateur(): ?Utilisateur
+    {
+        return $this->mentionedUser;
+    }
+
+    public function setMentionedUtilisateur(?Utilisateur $mentionedUser): static
+    {
+        $this->mentionedUser = $mentionedUser;
 
         return $this;
     }

@@ -22,6 +22,14 @@ final class ApparenceController extends AbstractController
     //         'apparences' => $apparenceRepository->findAll(),
     //     ]);
     // }
+    #[Route(path:'/apparences/{id}', name: 'app_apparence_index_personnage', methods: ['GET'])]
+    public function index(ApparenceRepository $apparenceRepository, int $id): Response
+    {
+        $personnageApparences = $apparenceRepository->findBy(['personnage' => $id]);
+        return $this->render('apparence/index.html.twig', [
+            'apparences' => $personnageApparences,
+        ]);
+    }
 
     #[Route('/new/{id}', name: 'app_apparence_new', methods: ['GET', 'POST'])]
     public function new(Request $request, PersonnageRepository $personnageRepository, EntityManagerInterface $entityManager,int $id): Response

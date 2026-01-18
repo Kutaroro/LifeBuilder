@@ -1,98 +1,59 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Personnage{% endblock %}
+{% block title %}Personnage - {{ personnage.nom }}{% endblock %}
 
 {% block body %}
 <div class="container mx-auto px-4 py-8 space-y-10">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">{{ personnage.nom }}</h1>
 
-    
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">Personnage</h1>
-
-    
+    {# --- SECTION INFORMATIONS --- #}
     <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-2xl font-bold text-gray-700 mb-4">Informations</h2>
-        <table class="table-auto w-full text-left border-collapse">
-            <tbody>
-                <tr class="border-b">
-                    <th class="py-2 px-4 font-medium text-gray-600">Id</th>
-                    <td class="py-2 px-4">{{ personnage.id }}</td>
-                </tr>
-                <tr class="border-b">
-                    <th class="py-2 px-4 font-medium text-gray-600">Nom</th>
-                    <td class="py-2 px-4">{{ personnage.nom }}</td>
-                </tr>
-                <tr>
-                    <th class="py-2 px-4 font-medium text-gray-600">Image</th>
-                    <td class="py-2 px-4">{{ personnage.image }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="flex flex-col md:flex-row gap-6">
+            <img src="{{ personnage.image }}" alt="{{ personnage.nom }}" class="w-32 h-32 object-cover rounded shadow">
+            <table class="table-auto w-full text-left border-collapse">
+                <tbody>
+                    <tr class="border-b"><th class="py-2 px-4 text-gray-600">ID</th><td>{{ personnage.id }}</td></tr>
+                    <tr class="border-b"><th class="py-2 px-4 text-gray-600">Nom</th><td>{{ personnage.nom }}</td></tr>
+                    <tr><th class="py-2 px-4 text-gray-600">Description</th><td>{{ personnage.description }}</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
+    {# --- SECTION PERSONNAGES LIÉS --- #}
     <div class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-gray-700">Personnages liés</h2>
-                <button ... onclick="toggleForm('form-personnage')">Ajouter un personnage lié</button>
-
-                <form id="form-personnage"
-                    action="{{ path('app_add_persoLie') }}"
-                    method="POST"
-                    class="hidden mt-3 p-3 bg-gray-100 rounded">
-
-                    <input type="hidden" name="personnageId" value="{{ personnage.id }}">
-
-                    <label for="persoLies" class="block text-gray-700 mb-1">
-                        Personnages liés 
-                    </label>
-
-                    <select id="persoLies" name="persoLies" required class="border rounded px-2 py-1 w-60">
-                        <option value="">-- Choisir un personnage --</option>
-                        {% for pers in personnagesPublics %}
-                            <option value="{{ pers.id }}">{{ pers.nom }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">
-                        Valider
-                    </button>
-
-                    <button type="button"
-                            class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
-                            onclick="toggleForm('form-personnage')">
-                        Annuler
-                    </button>
-            </form>
-
-
+            <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="toggleForm('form-personnage-lie')">
+                Ajouter un lien
+            </button>
         </div>
 
-        <div class="space-y-4">
+        <form id="form-personnage-lie" action="{{ path('app_add_persoLie') }}" method="POST" class="hidden mb-6 p-4 bg-gray-100 rounded">
+            <input type="hidden" name="personnageId" value="{{ personnage.id }}">
+            <select name="persoLies" required class="border rounded px-2 py-1 w-64">
+                <option value="">-- Choisir un personnage --</option>
+                {% for pers in personnagesPublics %}
+                    <option value="{{ pers.id }}">{{ pers.nom }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="px-4 py-1 bg-green-600 text-white rounded ml-2">Lier</button>
+        </form>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             {% for item in personnage.persoLies %}
-                <div class="border rounded p-4 shadow-sm bg-gray-50">
-                    <div class="flex justify-between items-center mb-2">
-                        <strong class="text-gray-900">{{ item.nom }}</strong>
-                    </div>
-                    <p class="text-gray-700">{{ item.description }}</p>
-                    <div class="flex space-x-2 mt-2">
-                        
-                            {{ item.image }}
-                        
-                    </div>
-
-                    
-
-                    
-                </div>
+                <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="block p-4 border rounded hover:bg-gray-50 transition">
+                    <strong class="text-gray-900">{{ item.nom }}</strong>
+                    <p class="text-sm text-gray-600 truncate">{{ item.description }}</p>
+                </a>
             {% endfor %}
         </div>
     </div>
 
-
-
-
     <div class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">Histoires</h2>
+            <h2 class="text-2xl font-bold text-gray-700">Histoires <a class="text-sm" href="{{ path('app_histoire_index_personnage', {'id': personnage.id}) }}">> Gérer les histoires</a></h2>  
             <a href="{{ path('app_histoire_new', {'id': personnage.id}) }}"
                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
                Créer une histoire
@@ -134,7 +95,7 @@
 
     <div class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">Apparences</h2>
+            <h2 class="text-2xl font-bold text-gray-700">Apparences <a class="text-sm" href="{{ path('app_apparence_index_personnage', {'id': personnage.id}) }}">> Gérer les apparences</a></h2>
             <a href="{{ path('app_apparence_new', {'id': personnage.id}) }}"
                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
                Créer une apparence
@@ -180,97 +141,120 @@
     </div>
 
 
-    <div class="mt-10 bg-white shadow rounded-lg p-6">
-    <h2 class="text-2xl font-bold text-gray-800">Commentaires</h2>
 
-    
-    <button class="mt-3 px-3 py-1 bg-blue-300 text-white rounded"
-            onclick="toggleForm('form-commentaire')">
-        Ajouter un commentaire
-    </button>
 
-    <div id="form-commentaire"
-         class="hidden mt-4 p-4 bg-gray-100 rounded">
-        {{ include('commentaire/_form.html.twig') }}
-    </div>
+    {# --- SECTION COMMENTAIRES --- #}
+<div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Commentaires</h2>
 
-    
-    <div class="mt-6 space-y-4">
+    {% if is_granted('ROLE_USER') %}
+        <button class="mb-6 px-4 py-2 bg-blue-600 text-white rounded" onclick="toggleForm('form-commentaire-principal')">
+            Écrire un commentaire
+        </button>
+        <div id="form-commentaire-principal" class="hidden mb-8 p-4 border rounded bg-gray-50">
+            {{ include('commentaire/_form.html.twig', {'form': form}) }}
+        </div>
+    {% endif %}
 
-        {% for commentaire in personnage.commentaires %}
+    <div class="space-y-6">
+        {% for commentaire in commentaires %}
             {% if commentaire.commentaire is null %}
-
-                <!-- COMMENTAIRE PRINCIPAL -->
-                <div class="p-4 bg-gray-50 border rounded shadow-sm">
+                <div class="p-4 border rounded-lg bg-white shadow-sm" id="comment-{{ commentaire.id }}">
                     
-                    <div class="font-bold text-gray-900">
-                        {{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}
-                    </div>
-
-                    <p class="mt-1 text-gray-700">
-                        {{ commentaire.description }}
-                    </p>
-
-                    <div class="text-xs text-gray-500">
-                        {{ commentaire.date|date('d/m/Y H:i') }}
-                    </div>
-
-                    <!-- Bouton répondre -->
-                    <button class="mt-2 px-2 py-1 bg-blue-600 text-white text-xs rounded"
-                            onclick="toggleForm('form-reponse-{{ commentaire.id }}')">
-                        Répondre
-                    </button>
-
-                    <!-- Formulaire réponse (INCLUDE CONSERVÉ) -->
-                    <div id="form-reponse-{{ commentaire.id }}"
-                         class="hidden mt-3 p-3 bg-gray-100 rounded">
-                        {{ include('commentaire/_formReponse.html.twig') }}
-                    </div>
-
-                    <!-- RÉPONSES -->
-                    {% for rep in commentaire.reponses %}
-                        <div class="mt-3 ml-6 pl-4 border-l-2 border-gray-300">
-                            
-                            <div class="font-bold text-gray-800">
-                                {{ rep.utilisateur.nom }}
-                            </div>
-
-                            <p class="text-gray-700">
-                                {{ rep.description }}
-                            </p>
-
-                            <div class="text-xs text-gray-400">
-                                {{ rep.date|date('d/m/Y H:i') }}
-                            </div>
+                    {# 1. Le contenu du commentaire parent #}
+                    <div class="comment-content-block">
+                        <div class="flex justify-between text-sm text-gray-500 mb-2">
+                            <span class="font-bold text-gray-900">{{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}</span>
+                            <span>{{ commentaire.date|date('d/m/Y H:i') }}</span>
                         </div>
-                    {% endfor %}
+                        <p class="text-gray-800">{{ commentaire.description }}</p>
 
+                        {% if is_granted('ROLE_USER') %}
+                            <button class="mt-2 text-blue-600 text-sm font-medium hover:underline" 
+                                    onclick="setupReply(event, {{ commentaire.id }}, '{{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}')">
+                                Répondre
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    {# 2. Les réponses (elles s'affichent à la suite) #}
+                    <div class="mt-4 ml-8 space-y-3 border-l-2 border-gray-100 pl-4">
+                        {% for rep in commentaire.reponses %}
+                            <div class="text-sm p-3 bg-gray-50 rounded comment-content-block">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <span class="font-bold text-gray-900">{{ rep.utilisateur ? rep.utilisateur.nom : 'Anonyme' }}</span> 
+                                        <span class="text-gray-400 text-xs ml-2">{{ rep.date|date('d/m/Y H:i') }}</span>
+                                    </div>
+                                </div>
+                                <p class="mt-1 text-gray-700">
+                                    <span class="text-blue-500 font-medium">@{{ rep.mentionedUtilisateur ? rep.mentionedUtilisateur.nom : (commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme') }}</span> 
+                                    {{ rep.description }}
+                                </p>
+                                
+                                {% if is_granted('ROLE_USER') %}
+                                    <button class="text-xs text-gray-500 hover:text-blue-600 mt-1" 
+                                            onclick="setupReply(event, {{ commentaire.id }}, '{{ rep.utilisateur ? rep.utilisateur.nom : 'Anonyme' }}')">
+                                        Répondre
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
-
             {% endif %}
+        {% else %}
+            <p class="text-gray-500 italic text-center">Aucun commentaire pour le moment.</p>
         {% endfor %}
-
     </div>
 </div>
+
+{# --- LE FORMULAIRE CACHÉ (Injecté par JS) --- #}
+<div id="global-reply-form" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg my-4 mx-4">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-bold text-blue-800" id="reply-to-title"></span>
+        <button type="button" class="text-red-500 text-xs font-bold" onclick="cancelReply()">Annuler</button>
+    </div>
+    {{ form_start(formR) }}
+        <input type="hidden" name="commentaireID" id="input-parent-id">
+        {{ form_widget(formR) }}
+        <button type="submit" class="mt-2 px-4 py-1 bg-blue-600 text-white rounded shadow">Envoyer la réponse</button>
+    {{ form_end(formR) }}
 </div>
 
+<script>
+    function toggleForm(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('hidden');
+    }
 
-    <hr/>
-    <a href="{{ path('app_personnage_index') }}">back to list</a>
-    <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}">edit</a>
+    function setupReply(event, parentId, parentName) {
+        const form = document.getElementById('global-reply-form');
+        const title = document.getElementById('reply-to-title');
+        const inputId = document.getElementById('input-parent-id');
 
-    {{ include('personnage/_delete_form.html.twig') }}
+        // On trouve le bloc de texte le plus proche du bouton cliqué
+        const clickedButton = event.currentTarget;
+        const commentBlock = clickedButton.closest('.comment-content-block');
 
-    <script>
-        function toggleForm(formId,isAnswer=false) {
-            const form = document.getElementById(formId);
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
-        }
+        title.innerText = "Répondre à " + parentName;
+        inputId.value = parentId;
+        
+        form.classList.remove('hidden');
 
-    </script>
+        // Déplace le formulaire juste après le bloc de texte (parent ou enfant)
+        commentBlock.after(form);
+
+        // Focus sur le textarea pour gagner du temps
+        const textarea = form.querySelector('textarea');
+        if (textarea) textarea.focus();
+    }
+
+    function cancelReply() {
+        const form = document.getElementById('global-reply-form');
+        form.classList.add('hidden');
+        document.body.appendChild(form); // Remet le formulaire au chaud en bas de page
+    }
+</script>
 
 {% endblock %}

@@ -1,0 +1,283 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Personnage{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8 space-y-10">
+
+    
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">Personnage</h1>
+
+    
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">Informations</h2>
+        <table class="table-auto w-full text-left border-collapse">
+            <tbody>
+                <tr class="border-b">
+                    <th class="py-2 px-4 font-medium text-gray-600">Id</th>
+                    <td class="py-2 px-4">{{ personnage.id }}</td>
+                </tr>
+                <tr class="border-b">
+                    <th class="py-2 px-4 font-medium text-gray-600">Nom</th>
+                    <td class="py-2 px-4">{{ personnage.nom }}</td>
+                </tr>
+                <tr>
+                    <th class="py-2 px-4 font-medium text-gray-600">Image</th>
+                    <td class="py-2 px-4"><img src="{{ personnage.image }}" alt="{{ personnage.nom }}" class="w-16 h-16 object-cover rounded"></td>
+                </tr>
+                <tr>
+                    <th class="py-2 px-4 font-medium text-gray-600">Description</th>
+                    <td class="py-2 px-4">{{ personnage.description }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-700">Personnages liés</h2>
+                <button ... onclick="toggleForm('form-personnage')">Ajouter un personnage lié</button>
+
+                <form id="form-personnage"
+                    action="{{ path('app_add_persoLie') }}"
+                    method="POST"
+                    class="hidden mt-3 p-3 bg-gray-100 rounded">
+
+                    <input type="hidden" name="personnageId" value="{{ personnage.id }}">
+
+                    <label for="persoLies" class="block text-gray-700 mb-1">
+                        Personnages liés 
+                    </label>
+
+                    <select id="persoLies" name="persoLies" required class="border rounded px-2 py-1 w-60">
+                        <option value="">-- Choisir un personnage --</option>
+                        {% for pers in personnagesPublics %}
+                            <option value="{{ pers.id }}">{{ pers.nom }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">
+                        Valider
+                    </button>
+
+                    <button type="button"
+                            class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
+                            onclick="toggleForm('form-personnage')">
+                        Annuler
+                    </button>
+            </form>
+
+
+        </div>
+
+        <div class="space-y-4">
+            {% for item in personnage.persoLies %}
+                <a href="{{ path('app_personnage_show', {'id': item.id}) }}">
+                    <div class="border rounded p-4 shadow-sm bg-gray-50">
+                        <div class="flex justify-between items-center mb-2">
+                            <strong class="text-gray-900">{{ item.nom }}</strong>
+                        </div>
+                        <p class="text-gray-700">{{ item.description }}</p>
+                        <div class="flex space-x-2 mt-2">
+                            
+                                {{ item.image }}
+                            
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-700">Histoires <a class="text-sm" href="{{ path('app_histoire_index_personnage', {'id': personnage.id}) }}">> Gérer les histoires</a></h2>  
+            <a href="{{ path('app_histoire_new', {'id': personnage.id}) }}"
+               class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+               Créer une histoire
+            </a>
+        </div>
+
+        <div class="space-y-4">
+            {% for item in histoires %}
+                <div class="border rounded p-4 shadow-sm bg-gray-50">
+                    <div class="flex justify-between items-center mb-2">
+                        <strong class="text-gray-900">{{ item.titre }}</strong>
+                        <button type="button"
+                                class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
+                                onclick="toggleForm('form-histoire{{ item.id }}')">
+                            Modifier l'ordre
+                        </button>
+                    </div>
+                    <p class="text-gray-700">{{ item.description }}</p>
+
+                    
+                    <form id="form-histoire{{ item.id }}" 
+                          action="{{ path('app_personnage_histoire_ordre', {'personnageId': personnage.id, 'histoireId': item.id}) }}" 
+                          method="POST"
+                          class="hidden mt-3 p-3 bg-gray-100 rounded">
+                        <label for="ordreAffichage-{{ item.id }}" class="block text-gray-700 mb-1">
+                            Nouvel ordre d'affichage:
+                        </label>
+                        <input type="number" id="ordreAffichage-{{ item.id }}" name="ordreAffichage"
+                               min="1" required
+                               class="border rounded px-2 py-1 w-20">
+                        <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
+                        <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
+                                onclick="toggleForm('form-histoire{{ item.id }}')">Annuler</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-700">Apparences <a class="text-sm" href="{{ path('app_apparence_index_personnage', {'id': personnage.id}) }}">> Gérer les apparences</a></h2>
+            <a href="{{ path('app_apparence_new', {'id': personnage.id}) }}"
+               class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+               Créer une apparence
+            </a>
+        </div>
+
+        <div class="space-y-4">
+            {% for item in apparences %}
+                <div class="border rounded p-4 shadow-sm bg-gray-50">
+                    <div class="flex justify-between items-center mb-2">
+                        <strong class="text-gray-900">{{ item.titre }}</strong>
+                        <button type="button"
+                                class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
+                                onclick="toggleForm('form-apparence{{ item.id }}')">
+                            Modifier l'ordre
+                        </button>
+                    </div>
+                    <p class="text-gray-700">{{ item.description }}</p>
+                    <div class="flex space-x-2 mt-2">
+                        {% for image in item.images %}
+                            {{ image }}
+                        {% endfor %}
+                    </div>
+
+                    
+                    <form id="form-apparence{{ item.id }}" 
+                          action="{{ path('app_personnage_apparence_ordre', {'personnageId': personnage.id, 'apparenceId': item.id}) }}" 
+                          method="POST"
+                          class="hidden mt-3 p-3 bg-gray-100 rounded">
+                        <label for="ordreAffichage-{{ item.id }}" class="block text-gray-700 mb-1">
+                            Nouvel ordre d'affichage:
+                        </label>
+                        <input type="number" id="ordreAffichage-{{ item.id }}" name="ordreAffichage"
+                               min="1" required
+                               class="border rounded px-2 py-1 w-20">
+                        <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
+                        <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
+                                onclick="toggleForm('form-apparence{{ item.id }}')">Annuler</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="mt-10 bg-white shadow rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800">Commentaires</h2>
+
+        {% if is_granted('ROLE_USER') %}
+            <button class="mt-3 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    onclick="toggleForm('form-commentaire')">
+                Ajouter un commentaire
+            </button>
+            {# On inclut le formulaire principal ici #}
+            {{ include('commentaire/_form.html.twig') }}
+        {% else %}
+            <p class="mt-3 text-gray-600">
+                <a href="{{ path('app_login') }}" class="text-blue-600 underline">Connectez-vous</a> pour ajouter un commentaire.
+            </p>
+        {% endif %}
+
+        <div class="mt-6 space-y-4">
+            {% for commentaire in commentaires %}
+                {# On n'affiche que les commentaires parents au premier niveau #}
+                {% if commentaire.commentaire is null %}
+                    <div class="p-4 bg-gray-50 border rounded shadow-sm">
+                        
+                        <div class="font-bold text-gray-900">
+                            {{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}
+                        </div>
+
+                        <p class="mt-1 text-gray-700">
+                            {{ commentaire.description }}
+                        </p>
+
+                        <div class="text-xs text-gray-500">
+                            {{ commentaire.date|date('d/m/Y H:i') }}
+                        </div>
+
+                        {% if is_granted('ROLE_USER') %}
+                            <button class="mt-2 px-2 py-1 bg-blue-600 text-white text-xs rounded"
+                                    onclick="toggleForm('form-reponse-{{ commentaire.id }}')">
+                                Répondre
+                            </button>
+                            {# Formulaire de réponse caché par défaut #}
+                            {{ include('commentaire/_formReponse.html.twig') }}
+                        {% endif %}
+
+                        <div class="mt-3 space-y-3">
+                            {% for rep in commentaire.reponses %}
+                                <div class="ml-6 pl-4 border-l-2 border-gray-300">
+                                    <div class="font-bold text-gray-800">
+                                        {{ rep.utilisateur.nom }}
+                                        {% if rep.mentionedUtilisateur %}
+                                            <span class="text-sm text-gray-500 font-normal italic">
+                                                en réponse à {{ rep.mentionedUtilisateur.nom }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <p class="text-gray-700">{{ rep.description }}</p>
+
+                                    <div class="text-xs text-gray-400">
+                                        {{ rep.date|date('d/m/Y H:i') }}
+                                    </div>
+
+                                    {% if is_granted('ROLE_USER') %}
+                                    <button class="mt-2 px-2 py-1 bg-blue-600 text-white text-xs rounded"
+                                            onclick="toggleForm('form-reponse-{{ commentaire.id }}')">
+                                        Répondre
+                                    </button>
+                                    {# Formulaire de réponse caché par défaut #}
+                                    {{ include('commentaire/_formReponse.html.twig') }}
+                                {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div> {# Fin du div du commentaire principal #}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div> {# Fin de la section blanche des commentaires #}
+
+
+    <hr/>
+    <a href="{{ path('app_personnage_index') }}">back to list</a>
+    <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}">edit</a>
+
+    {{ include('personnage/_delete_form.html.twig') }}
+
+
+<script>
+        function toggleForm(formId,isAnswer=false) {
+            const form = document.getElementById(formId);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+</script>
+
+{% endblock %}

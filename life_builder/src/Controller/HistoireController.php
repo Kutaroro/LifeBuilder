@@ -22,6 +22,15 @@ final class HistoireController extends AbstractController
     //         'histoires' => $histoireRepository->findBy(['id' => $id]),
     //     ]);
     // }
+    #[Route(path:'/histoires/{id}', name: 'app_histoire_index_personnage', methods: ['GET'])]
+    public function index(HistoireRepository $histoireRepository, int $id): Response
+    {
+        $personnageHistoires = $histoireRepository->findBy(['personnage' => $id]);
+        return $this->render('histoire/index.html.twig', [
+            'histoires' => $personnageHistoires,
+            'id'=>$id,
+        ]);
+    }
 
     #[Route('/new/{id}', name: 'app_histoire_new', methods: ['GET', 'POST'])]
     public function new(Request $request, PersonnageRepository $personnageRepository, EntityManagerInterface $entityManager, int $id): Response

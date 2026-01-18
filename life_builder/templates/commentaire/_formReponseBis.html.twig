@@ -1,0 +1,18 @@
+{{ form_start(formR)}}
+    <input type="hidden" name="commentaireID" value="{{ parent_id }}">
+    <input type="hidden" name="mentionedUserId" value="{{ mentioned_user.id }}">
+
+    <input
+        name="{{ field_name(formR.description) }}"
+        type="text"
+        value="{{ formR.description.vars.value|e }}"
+    >
+    {{ form_rest(formR) }}
+    <button class="btn">{{ button_label|default('Save') }}</button>
+    <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        onclick="toggleForm('form-commentaire')">
+                    Annuler
+    </button>
+    
+{{ form_end(formR) }}
