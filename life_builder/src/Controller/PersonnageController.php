@@ -45,7 +45,7 @@ final class PersonnageController extends AbstractController
 
     #[Route('/new', name: 'app_personnage_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    {   
         $personnage = new Personnage();
         $form = $this->createForm(PersonnageType::class, $personnage);
         $form->handleRequest($request);
@@ -167,7 +167,15 @@ final class PersonnageController extends AbstractController
 
     #[Route('/{id}/edit/informations', name: 'app_personnage_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        $utilisateur = $personnage->getUtilisateur();
+        $currentUser = $this->getUser();
+
+       // Si on veux modifier un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
+
         $form = $this->createForm(PersonnageType::class, $personnage);
         $form->handleRequest($request);
 
@@ -186,6 +194,14 @@ final class PersonnageController extends AbstractController
     #[Route('/{id}', name: 'app_personnage_delete', methods: ['POST'])]
     public function delete(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
     {
+        $utilisateur = $personnage->getUtilisateur();
+        $currentUser = $this->getUser();
+
+       // Si on veux supprimer un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce personnage.");
+        }
+
         if ($this->isCsrfTokenValid('delete'.$personnage->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($personnage);
             $entityManager->flush();
