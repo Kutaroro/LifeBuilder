@@ -18,6 +18,13 @@
                     <tr><th class="py-2 px-4 text-gray-600">Description</th><td>{{ personnage.description }}</td></tr>
                 </tbody>
             </table>
+            <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}">
+                {% if app.user == personnage.utilisateur %}
+                    <svg class="w-6 h-6 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/>
+                    </svg>
+                 {% endif %}
+            </a>
         </div>
     </div>
 
@@ -25,9 +32,11 @@
     <div class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-gray-700">Personnages liés</h2>
-            <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="toggleForm('form-personnage-lie')">
-                Ajouter un lien
-            </button>
+            {% if app.user == personnage.utilisateur %}
+                <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="toggleForm('form-personnage-lie')">
+                    Ajouter un lien
+                </button>
+            {% endif %}
         </div>
 
         <form id="form-personnage-lie" action="{{ path('app_add_persoLie') }}" method="POST" class="hidden mb-6 p-4 bg-gray-100 rounded">
@@ -44,8 +53,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             {% for item in personnage.persoLies %}
                 <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="block p-4 border rounded hover:bg-gray-50 transition">
-                    <strong class="text-gray-900">{{ item.nom }}</strong>
-                    <p class="text-sm text-gray-600 truncate">{{ item.description }}</p>
+                    <div class="flex flex-row space-x-4">
+                        {% if item.image %}
+                            <img src="{{ item.image }}" alt="{{ item.nom }}" class="w-16 h-16 object-cover rounded shadow">
+                        {% endif %}
+                        <div>
+                            <strong class="text-gray-900">{{ item.nom }}</strong>
+                            <p class="text-sm text-gray-600">{{ item.description }}</p>
+                        </div>
+                    </div>
                 </a>
             {% endfor %}
         </div>
@@ -53,11 +69,23 @@
 
     <div class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">Histoires <a class="text-sm" href="{{ path('app_histoire_index_personnage', {'id': personnage.id}) }}">> Gérer les histoires</a></h2>  
-            <a href="{{ path('app_histoire_new', {'id': personnage.id}) }}"
-               class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-               Créer une histoire
-            </a>
+            <h2 class="text-2xl font-bold text-gray-700">Dernières histoires <a class="text-sm" href="{{ path('app_histoire_index_personnage', {'id': personnage.id}) }}">> Voir tout</a></h2>  
+            {% if app.user == personnage.utilisateur %}
+                <a href="{{ path('app_histoire_new', {'id': personnage.id}) }}"
+                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                Créer une histoire
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="flex flex-row space-x-4 mb-6 overflow-x-auto">
+            {% for categorie in categories %}
+                <a href="{{ path('app_personnage_show', {'id': personnage.id, 'category': categorie.categorie}) }}" 
+                class="border border-xl border-black hover:text-white text-xs rounded-full rounded p-3 hover:bg-black"> 
+                {{categorie.categorie}} </a>
+            {% endfor %}
+        
+
         </div>
 
         <div class="space-y-4">
@@ -65,11 +93,17 @@
                 <div class="border rounded p-4 shadow-sm bg-gray-50">
                     <div class="flex justify-between items-center mb-2">
                         <strong class="text-gray-900">{{ item.titre }}</strong>
-                        <button type="button"
-                                class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
-                                onclick="toggleForm('form-histoire{{ item.id }}')">
-                            Modifier l'ordre
-                        </button>
+                        {% if app.user == personnage.utilisateur %}
+                            <button type="button"
+                                    class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
+                                    onclick="toggleForm('form-histoire{{ item.id }}')">
+                                Modifier l'ordre
+                            </button>
+                            <a href="{{ path('app_histoire_edit', {'id': item.id}) }}" 
+                               class="ml-2 px-2 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700">
+                                Éditer
+                            </a>
+                        {% endif %}
                     </div>
                     <p class="text-gray-700">{{ item.description }}</p>
 
@@ -96,10 +130,12 @@
     <div class="bg-white shadow rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-gray-700">Apparences <a class="text-sm" href="{{ path('app_apparence_index_personnage', {'id': personnage.id}) }}">> Gérer les apparences</a></h2>
-            <a href="{{ path('app_apparence_new', {'id': personnage.id}) }}"
-               class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-               Créer une apparence
-            </a>
+            {% if app.user == personnage.utilisateur %}
+                <a href="{{ path('app_apparence_new', {'id': personnage.id}) }}"
+                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                Créer une apparence
+                </a>
+            {% endif %}
         </div>
 
         <div class="space-y-4">
@@ -107,16 +143,22 @@
                 <div class="border rounded p-4 shadow-sm bg-gray-50">
                     <div class="flex justify-between items-center mb-2">
                         <strong class="text-gray-900">{{ item.titre }}</strong>
-                        <button type="button"
-                                class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
-                                onclick="toggleForm('form-apparence{{ item.id }}')">
-                            Modifier l'ordre
-                        </button>
+                        {% if app.user == personnage.utilisateur %}
+                            <button type="button"
+                                    class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
+                                    onclick="toggleForm('form-apparence{{ item.id }}')">
+                                Modifier l'ordre
+                            </button>
+                            <a href="{{ path('app_apparence_edit', {'id': item.id}) }}" 
+                               class="ml-2 px-2 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700">
+                                Éditer
+                            </a>
+                        {% endif %}
                     </div>
                     <p class="text-gray-700">{{ item.description }}</p>
                     <div class="flex space-x-2 mt-2">
                         {% for image in item.images %}
-                            {{ image }}
+                            <img src="{{ image }}" alt="Apparence Image" class="w-20 h-20 object-cover rounded shadow">
                         {% endfor %}
                     </div>
 
@@ -161,7 +203,7 @@
             {% if commentaire.commentaire is null %}
                 <div class="p-4 border rounded-lg bg-white shadow-sm" id="comment-{{ commentaire.id }}">
                     
-                    {# 1. Le contenu du commentaire parent #}
+                  
                     <div class="comment-content-block">
                         <div class="flex justify-between text-sm text-gray-500 mb-2">
                             <span class="font-bold text-gray-900">{{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}</span>
@@ -175,9 +217,11 @@
                                 Répondre
                             </button>
                         {% endif %}
+                        <a href="{{ path('app_commentaire_delete', {'id': commentaire.id}) }}" class="ml-4 text-red-600 text-sm font-medium hover:underline"> Supprimer </a>
+                            
                     </div>
 
-                    {# 2. Les réponses (elles s'affichent à la suite) #}
+                    
                     <div class="mt-4 ml-8 space-y-3 border-l-2 border-gray-100 pl-4">
                         {% for rep in commentaire.reponses %}
                             <div class="text-sm p-3 bg-gray-50 rounded comment-content-block">
@@ -198,6 +242,7 @@
                                         Répondre
                                     </button>
                                 {% endif %}
+                                <a href="{{ path('app_commentaire_delete', {'id': rep.id}) }}" class="ml-4 text-red-600 text-sm font-medium hover:underline"> Supprimer</a>
                             </div>
                         {% endfor %}
                     </div>

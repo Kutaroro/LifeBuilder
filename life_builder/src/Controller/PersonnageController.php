@@ -64,11 +64,20 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_personnage_show', methods: ['GET','POST'])]
-    public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager, FormFactoryInterface $formFactory): Response
+    #[Route('/{id}/{category}', name: 'app_personnage_show', methods: ['GET','POST'])]
+    public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager, FormFactoryInterface $formFactory, ?string $category = null): Response
     {   
         // Trie des histoires par ordre d'affichage (Valeur nulle à la fin)
-        $histoires = $personnage->getHistoires()->toArray();
+
+        if ($category) {
+            $histoires = $entityManager->getRepository(Histoire::class)->findBy([
+                'personnage' => $personnage,
+                'categorie' => $category
+            ]);
+        } else {
+            $histoires = $personnage->getHistoires()->toArray();
+        }
+      
         usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
             $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
             $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
@@ -84,7 +93,7 @@ final class PersonnageController extends AbstractController
 
         $commentaires= $personnage->getCommentaires()->toArray();
 
-        // 1. Formulaire pour un nouveau commentaire (Parent)
+        // Commentaire
         $commentaire = new Commentaire();
         $form = $formFactory->createNamed('base_comment', CommentaireType::class, $commentaire);
         $form->handleRequest($request);
@@ -99,13 +108,12 @@ final class PersonnageController extends AbstractController
             return $this->redirectToRoute('app_personnage_show', ['id' => $personnage->getId()]);
         }
 
-        // 2. Formulaire pour une réponse
+        // Repo,nse 
         $reponseObj = new Commentaire();
         $formReponse = $formFactory->createNamed('reply_comment', CommentaireType::class, $reponseObj);
         $formReponse->handleRequest($request);
 
         if ($formReponse->isSubmitted() && $formReponse->isValid()) {
-            // On récupère l'ID du parent envoyé via le champ caché du JS
             $parentID = $request->request->get('commentaireID'); 
             $parent = $entityManager->getRepository(Commentaire::class)->find($parentID);
 
@@ -134,7 +142,15 @@ final class PersonnageController extends AbstractController
             ->orderBy('p.nom', 'ASC')
             ->getQuery()
             ->getResult();
-       
+
+        $categories = $entityManager->getRepository(Histoire::class)
+            ->createQueryBuilder('h')
+            ->select('DISTINCT h.categorie')
+            ->andWhere('h.personnage = :p')
+            ->setParameter('p', $personnage)
+            ->getQuery()
+            ->getResult();
+
 
         return $this->render('personnage/show.html.twig', [
             'personnage' => $personnage,
@@ -144,11 +160,12 @@ final class PersonnageController extends AbstractController
             'apparences'=>$apparences,
             'histoires'=>$histoires,
             'commentaires'=>$commentaires,
+            'categories'=>$categories,
 
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_personnage_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit/informations', name: 'app_personnage_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(PersonnageType::class, $personnage);
@@ -197,6 +214,7 @@ final class PersonnageController extends AbstractController
 
         return $this->redirectToRoute('app_personnage_show', ['id' => $personnageId]);
     }
+
 
 
 

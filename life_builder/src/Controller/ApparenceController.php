@@ -28,6 +28,7 @@ final class ApparenceController extends AbstractController
         $personnageApparences = $apparenceRepository->findBy(['personnage' => $id]);
         return $this->render('apparence/index.html.twig', [
             'apparences' => $personnageApparences,
+            'id'=>$id,
         ]);
     }
 
