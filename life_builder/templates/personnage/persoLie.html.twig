@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Personnages liés {% endblock %}
+
+{% block body %}
+    {{ include("personnage/headerbis.html.twig") }}
+    {% for perso in personnagesLies %}
+        {{perso.nom}} <br>
+        {{perso.description}} <br>
+        <img src="{{ asset('uploads/personnages/' ~ perso.image) }}" alt="{{ perso.nom }}"  style="max-width: 200px;"><br>
+        <a href="{{ path('app_personnage_show', {'id': perso.id}) }}">Voir le personnage</a>
+    {% endfor %}
+{% endblock %}

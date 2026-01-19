@@ -3,249 +3,177 @@
 {% block title %}Personnage - {{ personnage.nom }}{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-8 space-y-10">
-    <div>
-        <h1 class="text-4xl font-bold text-gray-800 mb-6">{{ personnage.nom }}</h1>
-        <h2 class="text-xl text-gray-600 mb-8">Personnage de {{ personnage.utilisateur.nom }}</h2>
-    </div>
-    {# --- SECTION INFORMATIONS --- #}
-    <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-700 mb-4">Informations</h2>
-        <div class="flex flex-col md:flex-row gap-6">
-            <img src="{{ personnage.image }}" alt="{{ personnage.nom }}" class="w-32 h-32 object-cover rounded shadow">
-            <table class="table-auto w-full text-left border-collapse">
-                <tbody>
-                    <tr class="border-b"><th class="py-2 px-4 text-gray-600">ID</th><td>{{ personnage.id }}</td></tr>
-                    <tr class="border-b"><th class="py-2 px-4 text-gray-600">Nom</th><td>{{ personnage.nom }}</td></tr>
-                    <tr><th class="py-2 px-4 text-gray-600">Description</th><td>{{ personnage.description }}</td></tr>
-                </tbody>
-            </table>
-            <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}">
-                {% if app.user == personnage.utilisateur %}
-                    <svg class="w-6 h-6 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M9.586 2.586A2 2 0 0 1 11 2h2a2 2 0 0 1 2 2v.089l.473.196.063-.063a2.002 2.002 0 0 1 2.828 0l1.414 1.414a2 2 0 0 1 0 2.827l-.063.064.196.473H20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-.089l-.196.473.063.063a2.002 2.002 0 0 1 0 2.828l-1.414 1.414a2 2 0 0 1-2.828 0l-.063-.063-.473.196V20a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-.089l-.473-.196-.063.063a2.002 2.002 0 0 1-2.828 0l-1.414-1.414a2 2 0 0 1 0-2.827l.063-.064L4.089 15H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h.09l.195-.473-.063-.063a2 2 0 0 1 0-2.828l1.414-1.414a2 2 0 0 1 2.827 0l.064.063L9 4.089V4a2 2 0 0 1 .586-1.414ZM8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"/>
-                    </svg>
-                 {% endif %}
-            </a>
-        </div>
-    </div>
 
-    {# --- SECTION PERSONNAGES LIÉS --- #}
-    <div class="bg-white shadow rounded-lg p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">Personnages liés</h2>
-            {% if app.user == personnage.utilisateur %}
-                <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="toggleForm('form-personnage-lie')">
-                    Ajouter un lien
-                </button>
-            {% endif %}
+{{ include("personnage/headerbis.html.twig") }}
+
+<div class="max-w-5xl mx-auto px-4 py-10 space-y-16 text-gray-800">
+
+    <section class="flex flex-col md:flex-row gap-10">
+        <div class="md:w-3/5 space-y-4">
+            <div class="relative group">
+                <img src="{{ asset('uploads/personnages/' ~ personnage.image) }}" alt="{{ personnage.nom }}" 
+                     class="w-full h-[500px] object-cover rounded-xl shadow-lg border border-gray-100">
+            </div>
+
+            
+            <div class="flex gap-4 overflow-x-auto pb-2">
+                {% if  personnage.imagesSecondaires %}
+                    {% for img in personnage.imagesSecondaires %}
+                        <img src="{{ asset('uploads/personnages/' ~ img) }}" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition">
+                    {% endfor %}
+                {% endif %}    
+            </div>
         </div>
 
-        <form id="form-personnage-lie" action="{{ path('app_add_persoLie') }}" method="POST" class="hidden mb-6 p-4 bg-gray-100 rounded">
-            <input type="hidden" name="personnageId" value="{{ personnage.id }}">
-            <select name="persoLies" required class="border rounded px-2 py-1 w-64">
-                <option value="">-- Choisir un personnage --</option>
-                {% for pers in personnagesPublics %}
-                    <option value="{{ pers.id }}">{{ pers.nom }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="px-4 py-1 bg-green-600 text-white rounded ml-2">Lier</button>
-        </form>
+        <div class="md:w-2/5 space-y-6">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-5xl font-extrabold tracking-tight">{{ personnage.nom }}</h1>
+                    {% if app.user == personnage.utilisateur %}
+                        <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}" 
+                        class="text-gray-400 hover:text-black transition mt-2" title="Éditer le personnage">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.05 8.93a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.27.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                            </svg>                   
+                        </a>
+                        <span class="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
+                            {{ personnage.isPublic ? 'Visible par tous' : 'Privé' }}
+                        </span>     
+                    {% endif %}
+                    
+                </div>
+                <p class="text-gray-400 mt-2 font-medium">(Placeholder Cat)</p>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {% for item in personnage.persoLies %}
-                <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="block p-4 border rounded hover:bg-gray-50 transition">
-                    <div class="flex flex-row space-x-4">
-                        {% if item.image %}
-                            <img src="{{ item.image }}" alt="{{ item.nom }}" class="w-16 h-16 object-cover rounded shadow">
-                        {% endif %}
-                        <div>
-                            <strong class="text-gray-900">{{ item.nom }}</strong>
-                            <p class="text-sm text-gray-600">{{ item.description }}</p>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold">Tags</span>
+                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold">Test</span>
+            </div>
+
+            <div class="prose prose-blue text-gray-600 leading-relaxed">
+                {{ personnage.description|nl2br }}
+            </div>
+        </div>
+    </section>
+
+    <hr class="border-gray-100">
+
+    <section class="space-y-8">
+        <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Apparence</h2>
+        <div class="space-y-12">
+            {% for item in apparences %}
+                <div class="flex flex-col md:flex-row gap-8 items-start group">
+                    {% if item.images %}
+                        <div class="w-full h-64 flex items-center justify-center overflow-hidden relative">
+                            {% if item.images|length > 0 %}
+                                <img src="{{ item.images[0] }}" class="w-full h-full object-cover">
+                            {% endif %}
                         </div>
+                     {% endif %}
+                    <div class="flex-1 space-y-2">
+                        <div class="flex justify-between">
+                            <h3 class="text-xl font-bold uppercase tracking-wide">{{ item.titre }}</h3>
+                            <button class="text-gray-400 hover:text-black">•••</button>
+                        </div>
+                        <p class="text-gray-500 leading-relaxed">{{ item.description }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    
+    <section class="space-y-6">
+        <div class="flex justify-between items-end">
+            <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Personnages liés ></h2>
+            <div class="flex gap-2">
+                <button class="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <button class="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {% for item in personnage.persoLies %}
+                <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="group space-y-3">
+                    {% if item.image %}
+                        <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                            <img src="{{ asset('uploads/personnages/' ~ item.image) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        </div>
+                    {% else %}
+                        <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50">
+                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                     {% endif %}
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-lg">{{ item.nom }}</h4>
+                            <p class="text-xs text-gray-400 italic">Ami d'enfance (Placeholder Relation)</p>
+                        </div>
+                        <button class="text-gray-400">•••</button>
                     </div>
                 </a>
             {% endfor %}
         </div>
-    </div>
+    </section>
 
-    <div class="bg-white shadow rounded-lg p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">Dernières histoires <a class="text-sm" href="{{ path('app_histoire_index_personnage', {'id': personnage.id}) }}">> Voir tout</a></h2>  
-            {% if app.user == personnage.utilisateur %}
-                <a href="{{ path('app_histoire_new', {'id': personnage.id}) }}"
-                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-                Créer une histoire
-                </a>
-            {% endif %}
-        </div>
-
-        <div class="flex flex-row space-x-4 mb-6 overflow-x-auto">
+    
+    <section class="space-y-8 bg-gray-50 -mx-4 px-4 py-12 rounded-3xl">
+        <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Histoires de personnage ></h2>
+        
+        <div class="flex gap-2">
             {% for categorie in categories %}
                 <a href="{{ path('app_personnage_show', {'id': personnage.id, 'category': categorie.categorie}) }}" 
-                class="border border-xl border-black hover:text-white text-xs rounded-full rounded p-3 hover:bg-black"> 
-                {{categorie.categorie}} </a>
-            {% endfor %}
-        
-
-        </div>
-
-        <div class="space-y-4">
-            {% for item in histoires %}
-                <div class="border rounded p-4 shadow-sm bg-gray-50">
-                    <div class="flex justify-between items-center mb-2">
-                        <strong class="text-gray-900">{{ item.titre }}</strong>
-                        {% if app.user == personnage.utilisateur %}
-                            <button type="button"
-                                    class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
-                                    onclick="toggleForm('form-histoire{{ item.id }}')">
-                                Modifier l'ordre
-                            </button>
-                            <a href="{{ path('app_histoire_edit', {'id': item.id}) }}" 
-                               class="ml-2 px-2 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700">
-                                Éditer
-                            </a>
-                        {% endif %}
-                    </div>
-                    <p class="text-gray-700">{{ item.description }}</p>
-
-                    
-                    <form id="form-histoire{{ item.id }}" 
-                          action="{{ path('app_personnage_histoire_ordre', {'personnageId': personnage.id, 'histoireId': item.id}) }}" 
-                          method="POST"
-                          class="hidden mt-3 p-3 bg-gray-100 rounded">
-                        <label for="ordreAffichage-{{ item.id }}" class="block text-gray-700 mb-1">
-                            Nouvel ordre d'affichage:
-                        </label>
-                        <input type="number" id="ordreAffichage-{{ item.id }}" name="ordreAffichage"
-                               min="1" required
-                               class="border rounded px-2 py-1 w-20">
-                        <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
-                        <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
-                                onclick="toggleForm('form-histoire{{ item.id }}')">Annuler</button>
-                    </form>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="bg-white shadow rounded-lg p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-700">Apparences <a class="text-sm" href="{{ path('app_apparence_index_personnage', {'id': personnage.id}) }}">> Gérer les apparences</a></h2>
-            {% if app.user == personnage.utilisateur %}
-                <a href="{{ path('app_apparence_new', {'id': personnage.id}) }}"
-                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
-                Créer une apparence
+                   class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
+                   {{ categorie.categorie }}
                 </a>
-            {% endif %}
+            {% endfor %}
         </div>
 
-        <div class="space-y-4">
-            {% for item in apparences %}
-                <div class="border rounded p-4 shadow-sm bg-gray-50">
-                    <div class="flex justify-between items-center mb-2">
-                        <strong class="text-gray-900">{{ item.titre }}</strong>
-                        {% if app.user == personnage.utilisateur %}
-                            <button type="button"
-                                    class="px-2 py-1 bg-blue-600 text-white rounded text-sm"
-                                    onclick="toggleForm('form-apparence{{ item.id }}')">
-                                Modifier l'ordre
-                            </button>
-                            <a href="{{ path('app_apparence_edit', {'id': item.id}) }}" 
-                               class="ml-2 px-2 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700">
-                                Éditer
-                            </a>
-                        {% endif %}
+        <div class="space-y-12 max-w-3xl">
+            {% for item in histoires %}
+                <div class="relative pl-8 border-l-2 border-gray-200 space-y-2 group">
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-black"></div>
+                    <div class="flex justify-between">
+                        <h3 class="text-xl font-bold">{{ item.titre }}</h3>
+                        <button class="text-gray-400">•••</button>
                     </div>
-                    <p class="text-gray-700">{{ item.description }}</p>
-                    <div class="flex space-x-2 mt-2">
-                        {% for image in item.images %}
-                            <img src="{{ image }}" alt="Apparence Image" class="w-20 h-20 object-cover rounded shadow">
-                        {% endfor %}
-                    </div>
-
-                    
-                    <form id="form-apparence{{ item.id }}" 
-                          action="{{ path('app_personnage_apparence_ordre', {'personnageId': personnage.id, 'apparenceId': item.id}) }}" 
-                          method="POST"
-                          class="hidden mt-3 p-3 bg-gray-100 rounded">
-                        <label for="ordreAffichage-{{ item.id }}" class="block text-gray-700 mb-1">
-                            Nouvel ordre d'affichage:
-                        </label>
-                        <input type="number" id="ordreAffichage-{{ item.id }}" name="ordreAffichage"
-                               min="1" required
-                               class="border rounded px-2 py-1 w-20">
-                        <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
-                        <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
-                                onclick="toggleForm('form-apparence{{ item.id }}')">Annuler</button>
-                    </form>
+                    <p class="text-gray-600 leading-relaxed">{{ item.description }}</p>
                 </div>
             {% endfor %}
         </div>
-    </div>
+    </section>
 
-
-
-
+    
     {# --- SECTION COMMENTAIRES --- #}
-<div class="bg-white shadow rounded-lg p-6">
+<div class="bg-white shadow rounded-lg p-6 max-w-4xl mx-auto">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Commentaires</h2>
 
     {% if is_granted('ROLE_USER') %}
-        <button class="mb-6 px-4 py-2 bg-blue-600 text-white rounded" onclick="toggleForm('form-commentaire-principal')">
-            Écrire un commentaire
-        </button>
-        <div id="form-commentaire-principal" class="hidden mb-8 p-4 border rounded bg-gray-50">
+        <div id="form-commentaire-principal" class="mb-8">
             {{ include('commentaire/_form.html.twig', {'form': form}) }}
         </div>
     {% endif %}
 
-    <div class="space-y-6">
+    <div class="space-y-8">
+        {% import _self as macros %}
+        
         {% for commentaire in commentaires %}
             {% if commentaire.commentaire is null %}
-                <div class="p-4 border rounded-lg bg-white shadow-sm" id="comment-{{ commentaire.id }}">
-                    
-                  
-                    <div class="comment-content-block">
-                        <div class="flex justify-between text-sm text-gray-500 mb-2">
-                            <span class="font-bold text-gray-900">{{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}</span>
-                            <span>{{ commentaire.date|date('d/m/Y H:i') }}</span>
-                        </div>
-                        <p class="text-gray-800">{{ commentaire.description }}</p>
-
-                        {% if is_granted('ROLE_USER') %}
-                            <button class="mt-2 text-blue-600 text-sm font-medium hover:underline" 
-                                    onclick="setupReply(event, {{ commentaire.id }}, '{{ commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme' }}')">
-                                Répondre
-                            </button>
-                        {% endif %}
-                        <a href="{{ path('app_commentaire_delete', {'id': commentaire.id}) }}" class="ml-4 text-red-600 text-sm font-medium hover:underline"> Supprimer </a>
-                            
+                {# Niveau 1 : Le commentaire parent #}
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-11 md:col-span-8">
+                        {{ macros.display_comment(commentaire, formR, false,personnage) }}
                     </div>
-
                     
-                    <div class="mt-4 ml-8 space-y-3 border-l-2 border-gray-100 pl-4">
+                    {# Niveau 2 : Conteneur pour TOUTES les réponses de ce parent #}
+                    <div class="col-span-11 col-start-2 md:col-span-8 md:col-start-5 space-y-4 mt-4">
                         {% for rep in commentaire.reponses %}
-                            <div class="text-sm p-3 bg-gray-50 rounded comment-content-block">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <span class="font-bold text-gray-900">{{ rep.utilisateur ? rep.utilisateur.nom : 'Anonyme' }}</span> 
-                                        <span class="text-gray-400 text-xs ml-2">{{ rep.date|date('d/m/Y H:i') }}</span>
-                                    </div>
-                                </div>
-                                <p class="mt-1 text-gray-700">
-                                    <span class="text-blue-500 font-medium">@{{ rep.mentionedUtilisateur ? rep.mentionedUtilisateur.nom : (commentaire.utilisateur ? commentaire.utilisateur.nom : 'Anonyme') }}</span> 
-                                    {{ rep.description }}
-                                </p>
-                                
-                                {% if is_granted('ROLE_USER') %}
-                                    <button class="text-xs text-gray-500 hover:text-blue-600 mt-1" 
-                                            onclick="setupReply(event, {{ commentaire.id }}, '{{ rep.utilisateur ? rep.utilisateur.nom : 'Anonyme' }}')">
-                                        Répondre
-                                    </button>
-                                {% endif %}
-                                <a href="{{ path('app_commentaire_delete', {'id': rep.id}) }}" class="ml-4 text-red-600 text-sm font-medium hover:underline"> Supprimer</a>
-                            </div>
+                            {{ macros.display_comment(rep, formR, true,personnage) }}
+                            {# Si tu veux gérer les réponses de réponses au même niveau, 
+                               on peut boucler récursivement ici ou aplatir la liste #}
+                            {% for sub_rep in rep.reponses %}
+                                {{ macros.display_comment(sub_rep, formR, true,personnage) }}
+                            {% endfor %}
                         {% endfor %}
                     </div>
                 </div>
@@ -256,16 +184,62 @@
     </div>
 </div>
 
-{# --- LE FORMULAIRE CACHÉ (Injecté par JS) --- #}
-<div id="global-reply-form" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg my-4 mx-4">
+{# --- Macro adaptée --- #}
+{% macro display_comment(comment, formR, isReply, personnage) %}
+    <div id="comment-{{ comment.id }}" class="relative group">
+        <div class="flex items-start gap-3 {{ isReply ? 'flex-row-reverse text-right' : '' }}">
+            
+            {# Avatar (Placeholder basé sur ton image) #}
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
+                    {# <img src="{{ comment.utilisateur.avatar }}" alt="avatar"> #}
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <div class="{{ isReply ? 'bg-gray-50' : 'bg-white' }} p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-gray-900">{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}</span>
+                        <span class="text-xs text-gray-400">{{ comment.date|date('d/m/Y H:i') }}</span>
+                    </div>
+                    
+                    <p class="text-gray-800 text-sm">
+                        {% if comment.mentionedUtilisateur %}
+                            <span class="text-blue-500 font-medium">@{{ comment.mentionedUtilisateur.nom }}</span>
+                        {% endif %}
+                        {{ comment.description }}
+                    </p>
+                </div>
+
+                {# Actions (Répondre / Supprimer) #}
+                <div class="flex gap-4 mt-1 px-2 {{ isReply ? 'justify-end' : 'justify-start' }}">
+                    {% if is_granted('ROLE_USER') %}
+                        <button onclick="setupReply(event, {{ comment.id }}, '{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}')" class="text-xs text-gray-500 hover:text-blue-600 font-semibold">Répondre</button>
+                    {% endif %}
+                    {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_commentaire_delete', {'id': comment.id}) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Supprimer ?')">Effacer</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{# --- LE FORMULAIRE CACHÉ (Indispensable pour setupReply) --- #}
+<div id="global-reply-form" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-xl my-4 shadow-sm">
     <div class="flex justify-between items-center mb-2">
-        <span class="text-sm font-bold text-blue-800" id="reply-to-title"></span>
+        <span class="text-sm font-bold text-blue-800" id="reply-to-title">Réponse</span>
         <button type="button" class="text-red-500 text-xs font-bold" onclick="cancelReply()">Annuler</button>
     </div>
+    
     {{ form_start(formR) }}
         <input type="hidden" name="commentaireID" id="input-parent-id">
-        {{ form_widget(formR) }}
-        <button type="submit" class="mt-2 px-4 py-1 bg-blue-600 text-white rounded shadow">Envoyer la réponse</button>
+        <div class="space-y-2">
+            {{ form_widget(formR.description, {'attr': {'class': 'w-full rounded-lg border-gray-300 text-sm', 'placeholder': 'Votre réponse...'}}) }}
+        </div>
+        <button type="submit" class="mt-2 px-4 py-1 bg-blue-600 text-white text-sm rounded-lg shadow hover:bg-blue-700 transition">
+            Répondre
+        </button>
     {{ form_end(formR) }}
 </div>
 
@@ -275,33 +249,22 @@
         el.classList.toggle('hidden');
     }
 
-    function setupReply(event, parentId, parentName) {
-        const form = document.getElementById('global-reply-form');
-        const title = document.getElementById('reply-to-title');
-        const inputId = document.getElementById('input-parent-id');
-
-        // On trouve le bloc de texte le plus proche du bouton cliqué
-        const clickedButton = event.currentTarget;
-        const commentBlock = clickedButton.closest('.comment-content-block');
-
-        title.innerText = "Répondre à " + parentName;
-        inputId.value = parentId;
-        
-        form.classList.remove('hidden');
-
-        // Déplace le formulaire juste après le bloc de texte (parent ou enfant)
-        commentBlock.after(form);
-
-        // Focus sur le textarea pour gagner du temps
-        const textarea = form.querySelector('textarea');
-        if (textarea) textarea.focus();
-    }
+    function setupReply(event, id, name) {
+    const form = document.getElementById('global-reply-form');
+    const targetContainer = event.target.closest('.flex-1'); // Trouve la bulle du commentaire
+    
+    document.getElementById('input-parent-id').value = id;
+    document.getElementById('reply-to-title').innerText = "Réponse à " + name;
+    
+    targetContainer.appendChild(form); // Déplace le formulaire sous le texte
+    form.classList.remove('hidden');
+}
 
     function cancelReply() {
         const form = document.getElementById('global-reply-form');
         form.classList.add('hidden');
-        document.body.appendChild(form); // Remet le formulaire au chaud en bas de page
+        // On le remet à la fin du document pour éviter qu'il ne disparaisse si un parent est supprimé en DOM
+        document.body.appendChild(form);
     }
 </script>
-
 {% endblock %}

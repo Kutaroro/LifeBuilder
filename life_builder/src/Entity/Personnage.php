@@ -60,6 +60,9 @@ class Personnage
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $imagesSecondaires = null;
+
     
     public function __construct()
     {
@@ -272,6 +275,18 @@ class Personnage
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getImagesSecondaires(): ?array
+    {
+        return $this->imagesSecondaires;
+    }
+
+    public function setImagesSecondaires(?array $imagesSecondaires): static
+    {
+        $this->imagesSecondaires = $imagesSecondaires;
 
         return $this;
     }

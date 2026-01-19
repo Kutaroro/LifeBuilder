@@ -180,9 +180,43 @@ final class PersonnageController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
 
-            return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
+            $file=$form->get('image')->getData();
+            if ($file) {
+                $newFilename = uniqid().'.'.$file->guessExtension();
+
+                $file->move(
+                    $this->getParameter('kernel.project_dir') . '/public/uploads/personnages',
+                    $newFilename
+                );
+
+                $personnage->setImage($newFilename);
+            }
+            $files = $form->get('imagesSecondaires')->getData();
+            
+            $imagesArray = $personnage->getImagesSecondaires() ?? [];
+            if ($files) {
+                foreach ($files as $file) {
+                    // On génère un nom unique pour éviter les doublons
+                    $newFilename = uniqid().'.'.$file->guessExtension();
+
+                    // On déplace le fichier dans le dossier public/uploads/personnages
+                    // (Assure-toi que ce dossier existe)
+                    $file->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/personnages',
+                        $newFilename
+                    );
+
+                    // On ajoute le nom du fichier au tableau
+                    $imagesArray[] = $newFilename;
+                }
+            }
+
+            // 3. On enregistre le tableau mis à jour
+            $personnage->setImagesSecondaires($imagesArray);
+
+            $entityManager->flush();
+            return $this->redirectToRoute('app_personnage_index');
         }
 
         return $this->render('personnage/edit.html.twig', [
@@ -230,6 +264,39 @@ final class PersonnageController extends AbstractController
 
         return $this->redirectToRoute('app_personnage_show', ['id' => $personnageId]);
     }
+
+    #[Route('{id}/personnageLie/', name: 'app_show_persoLie', methods: ['GET','POST'])]
+    public function showPersoLie(Personnage $personnage): Response
+    {
+
+        return $this->render('personnage/persoLie.html.twig', [
+            'personnagesLies' => $personnagesLies = $personnage->getPersoLies(),
+            'personnage' => $personnage,
+        ]);
+
+    }
+
+    #[Route('{id}/apparence/', name: 'app_show_apparence', methods: ['GET','POST'])]
+    public function showApparence(Personnage $personnage): Response
+    {
+
+        return $this->render('personnage/apparence.html.twig', [
+            'apparences' => $apparences = $personnage->getApparences(),
+            'personnage' => $personnage,
+        ]);    
+    }
+
+    #[Route('{id}/histoire/', name: 'app_show_histoire', methods: ['GET','POST'])]
+    public function showHistoire(Personnage $personnage): Response
+    {
+
+        return $this->render('personnage/histoire.html.twig', [
+            'histoires' => $histoires = $personnage->getHistoires(),
+            'personnage' => $personnage,
+        ]);      
+    }
+
+
 
 
 

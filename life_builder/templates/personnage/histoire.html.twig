@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Personnages liés {% endblock %}
+
+{% block body %}
+    {{ include("personnage/headerbis.html.twig") }}
+    {% for histoire in histoires %}
+        {{histoire.titre}}
+        {{histoire.categorie}}
+        {{histoire.description}}
+    {% endfor %}
+{% endblock %}
