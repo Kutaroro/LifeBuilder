@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ModStatus{% endblock %}
+
+{% block body %}
+    <h1>ModStatus</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ mod_status.id }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ mod_status.status }}</td>
+            </tr>
+            <tr>
+                <th>Type</th>
+                <td>{{ mod_status.type }}</td>
+            </tr>
+            <tr>
+                <th>Duree</th>
+                <td>{{ mod_status.duree ? mod_status.duree.format('%y year(s), %m month(s), %d day(s)') : '' }}</td>
+            </tr>
+            <tr>
+                <th>NbSig</th>
+                <td>{{ mod_status.nbSig }}</td>
+            </tr>
+            <tr>
+                <th>Sanctions</th>
+                <td>{{ mod_status.sanctions ? mod_status.sanctions|json_encode : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_mod_status_index') }}">back to list</a>
+
+    <a href="{{ path('app_mod_status_edit', {'id': mod_status.id}) }}">edit</a>
+
+    {{ include('mod_status/_delete_form.html.twig') }}
+{% endblock %}

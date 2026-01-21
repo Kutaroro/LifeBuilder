@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit ModStatus{% endblock %}
+
+{% block body %}
+    <h1>Edit ModStatus</h1>
+
+    {{ include('mod_status/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_mod_status_index') }}">back to list</a>
+
+    {{ include('mod_status/_delete_form.html.twig') }}
+{% endblock %}

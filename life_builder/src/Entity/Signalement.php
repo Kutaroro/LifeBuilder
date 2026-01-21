@@ -25,6 +25,21 @@ class Signalement
     #[ORM\ManyToOne(inversedBy: 'signalements')]
     private ?Utilisateur $utilisateur = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $type = null;
+
+    #[ORM\ManyToOne(inversedBy: 'signalementsEffectués')]
+    private ?Utilisateur $reportedBy = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $status = null;
+
+    #[ORM\ManyToOne(cascade: ['persist', 'remove'])]
+    private ?Utilisateur $mod = null;
+
+    #[ORM\ManyToOne(inversedBy: 'signalements')]
+    private ?Personnage $personnage = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +89,66 @@ class Signalement
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getReportedBy(): ?Utilisateur
+    {
+        return $this->reportedBy;
+    }
+
+    public function setReportedBy(?Utilisateur $reportedBy): static
+    {
+        $this->reportedBy = $reportedBy;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getMod(): ?Utilisateur
+    {
+        return $this->mod;
+    }
+
+    public function setMod(?Utilisateur $mod): static
+    {
+        $this->mod = $mod;
+
+        return $this;
+    }
+
+    public function getPersonnage(): ?Personnage
+    {
+        return $this->personnage;
+    }
+
+    public function setPersonnage(?Personnage $personnage): static
+    {
+        $this->personnage = $personnage;
 
         return $this;
     }

@@ -84,6 +84,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $modifiedAt = null;
 
+    /**
+     * @var Collection<int, Signalement>
+     */
+    #[ORM\OneToMany(targetEntity: Signalement::class, mappedBy: 'reportedBy')]
+    private Collection $signalementsEffectués;
+
     public function __construct()
     {
         $this->personnages = new ArrayCollection();
@@ -91,6 +97,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->amis = new ArrayCollection();
         $this->utilisateurs = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
+        $this->signalementsEffectués = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -383,6 +390,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setModifiedAt(\DateTimeImmutable $modifiedAt): static
     {
         $this->modifiedAt = $modifiedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Signalement>
+     */
+    public function getSignalementsEffectués(): Collection
+    {
+        return $this->signalementsEffectués;
+    }
+
+    public function addSignalementsEffectu(Signalement $signalementsEffectu): static
+    {
+        if (!$this->signalementsEffectués->contains($signalementsEffectu)) {
+            $this->signalementsEffectués->add($signalementsEffectu);
+            $signalementsEffectu->setReportedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSignalementsEffectu(Signalement $signalementsEffectu): static
+    {
+        if ($this->signalementsEffectués->removeElement($signalementsEffectu)) {
+            // set the owning side to null (unless already changed)
+            if ($signalementsEffectu->getReportedBy() === $this) {
+                $signalementsEffectu->setReportedBy(null);
+            }
+        }
 
         return $this;
     }

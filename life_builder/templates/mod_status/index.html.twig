@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ModStatus index{% endblock %}
+
+{% block body %}
+    <h1>ModStatus index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Duree</th>
+                <th>NbSig</th>
+                <th>Sanctions</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for mod_status in mod_statuses %}
+            <tr>
+                <td>{{ mod_status.id }}</td>
+                <td>{{ mod_status.status }}</td>
+                <td>{{ mod_status.type }}</td>
+                <td>{{ mod_status.duree ? mod_status.duree.format('%y year(s), %m month(s), %d day(s)') : '' }}</td>
+                <td>{{ mod_status.nbSig }}</td>
+                <td>{{ mod_status.sanctions ? mod_status.sanctions|json_encode : '' }}</td>
+                <td>
+                    <a href="{{ path('app_mod_status_show', {'id': mod_status.id}) }}">show</a>
+                    <a href="{{ path('app_mod_status_edit', {'id': mod_status.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_mod_status_new') }}">Create new</a>
+{% endblock %}

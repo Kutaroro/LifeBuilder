@@ -15,7 +15,20 @@ class SignalementRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Signalement::class);
     }
-
+ 
+    public function findByType($value,$value2): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.type = :val')
+            ->andWhere('s.status != :val2')
+            ->setParameter('val', $value)
+            ->setParameter('val2', $value2)
+            ->orderBy('s.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    
     //    /**
     //     * @return Signalement[] Returns an array of Signalement objects
     //     */

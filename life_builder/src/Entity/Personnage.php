@@ -69,6 +69,12 @@ class Personnage
     #[ORM\Column]
     private ?\DateTimeImmutable $modifiedAt = null;
 
+    /**
+     * @var Collection<int, Signalement>
+     */
+    #[ORM\OneToMany(targetEntity: Signalement::class, mappedBy: 'personnage')]
+    private Collection $signalements;
+
     
     public function __construct()
     {
@@ -77,6 +83,7 @@ class Personnage
         $this->commentaires = new ArrayCollection();
         $this->persoLies = new ArrayCollection();
         $this->personnagesLies = new ArrayCollection();
+        $this->signalements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -317,6 +324,36 @@ class Personnage
     public function setModifiedAt(\DateTimeImmutable $modifiedAt): static
     {
         $this->modifiedAt = $modifiedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Signalement>
+     */
+    public function getSignalements(): Collection
+    {
+        return $this->signalements;
+    }
+
+    public function addSignalement(Signalement $signalement): static
+    {
+        if (!$this->signalements->contains($signalement)) {
+            $this->signalements->add($signalement);
+            $signalement->setPersonnage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSignalement(Signalement $signalement): static
+    {
+        if ($this->signalements->removeElement($signalement)) {
+            // set the owning side to null (unless already changed)
+            if ($signalement->getPersonnage() === $this) {
+                $signalement->setPersonnage(null);
+            }
+        }
 
         return $this;
     }

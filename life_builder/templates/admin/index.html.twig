@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AdminController!{% endblock %}
+
+{% block body %}
+<main>  
+
+    <h1>Bienvenue dans le panneau d'administration</h1>
+
+    <section>
+        <h2>Signalements récents</h2>
+        {% if reports is empty %}
+            <p>Aucun signalement à afficher.</p>
+        {% else %}
+            <ul>
+                {% for report in reports %}
+                    <li>
+                        <strong>Catégorie: {{ report.type }}</strong> 
+                        - <strong>{{ report.titre}} </strong>
+                        - {{ report.description }} 
+                        - Utilisateur concerné: {{ report.utilisateur.nom}}
+                        {% if report.personnage %}
+                            (Personnage reporté: {{ report.personnage.nom }})
+                        {% endif %}
+                         (Signalé par : {{ report.reportedBy.nom }} le {{ report.date|date('d/m/Y H:i') }})
+                         {% if report.status == 'En cours de traitement' %}
+                            - <em>Status: En cours de traitement par {{ report.mod.nom }}</em>
+                        {% else %}
+                            - <em>Status: {{ report.status }}</em>
+                        {% endif %}
+                        {% if report.status == 'En attente' %}
+                            <form action="{{ path('app_signalement_take', {'id':report.id}) }}" method="post" style="display:inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('take' ~ report.id) }}">
+                                <button type="submit" class="btn btn-primary">Prendre le ticket</button>
+                            </form>
+                        {% endif %}
+                            <form action="{{ path('app_signalement_close', {'id': report.id}) }}" method="post" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('close' ~ report.id) }}">
+                            <button type="submit" class="btn btn-success">Marquer comme traité</button>
+                        </form>
+                    </li>
+                {% endfor %}
+                
+            </ul>
+        {% endif %}
+    </section>
+
+</main>
+{% endblock %}
