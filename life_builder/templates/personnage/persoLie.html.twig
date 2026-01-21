@@ -4,10 +4,98 @@
 
 {% block body %}
     {{ include("personnage/headerbis.html.twig") }}
-    {% for perso in personnagesLies %}
-        {{perso.nom}} <br>
-        {{perso.description}} <br>
-        <img src="{{ asset('uploads/personnages/' ~ perso.image) }}" alt="{{ perso.nom }}"  style="max-width: 200px;"><br>
-        <a href="{{ path('app_personnage_show', {'id': perso.id}) }}">Voir le personnage</a>
-    {% endfor %}
+    
+    <main class="p-8">
+        {% if personnagesLies %}
+            <div class="flex flex-col items-center justify-center gap-8">
+                <h1 class="text-5xl font-bold tracking-tight"> Personnages liés à <span class="font-extrabold "> {{ personnage.nom}} </span> </h1>
+                
+                
+                {% if app.user == personnage.utilisateur %}
+                    <button ... onclick="toggleForm('form-personnage')" class="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-gray-300 text-gray-600 transition-colors bg-white hover:text-white hover:bg-black">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span class="font-medium">Ajouter un personnage</span>
+                    </button>
+                    <form id="form-personnage"
+                    action="{{ path('app_add_persoLie', {'id': personnage.id}) }}"
+                    method="POST"
+                    class="hidden mt-3 p-3 bg-gray-100 rounded">
+
+                        <input type="hidden" name="personnageId" value="{{ personnage.id }}">
+
+                        <label for="persoLies" class="block text-gray-700 mb-1">
+                            Personnages liés 
+                        </label>
+
+                        <select id="persoLies" name="persoLies" required class="border rounded px-2 py-1 w-60">
+                            <option value="">-- Choisir un personnage --</option>
+                            {% for pers in personnagesPublics %}
+                                <option value="{{ pers.id }}">{{ pers.nom }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">
+                            Valider
+                        </button>
+
+                        <button type="button"
+                                class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
+                                onclick="toggleForm('form-personnage')">
+                            Annuler
+                        </button>
+                </form>
+                {% endif %}
+
+                <section class="flex flex-wrap items-center justify-center gap-6">
+                        {% for item in personnage.persoLies %}
+                        <div class="m-8">
+                            <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="group space-y-3">
+                                {% if item.image %}
+                                    <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                        <img src="{{ asset('uploads/personnages/' ~ item.image) }}" class="w-72 h-full object-cover group-hover:scale-105 transition duration-500">
+                                    </div>
+                                {% else %}
+                                    <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50">
+                                        <svg class="w-72 h-full text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                {% endif %}
+                            </a>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-lg">{{ item.nom }}</h4>
+                                    <p class="text-xs text-gray-400 italic">Ami d'enfance (Placeholder Relation)</p>
+                                </div>
+                                <button class="text-gray-400">•••</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                </section>
+            </div>
+        {% else %}
+            <h1 class="text-5xl font-bold tracking-tight"> Aucun personnage lié à <span class="font-extrabold "> {{ personnage.nom}} </span> </h1>
+            {% if app.user == personnage.utilisateur %}
+                    <div>
+                        <a href="{{ path('app_personnage_new') }}" class="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-gray-300 text-gray-600 hover:border-black hover:text-black transition-colors bg-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span class="font-medium">Ajouter un personnage</span>
+                        </a>
+                    </div>
+            {% endif %}
+        {% endif %}
+
+    </main>
+
+<script>
+        function toggleForm(formId,isAnswer=false) {
+            const form = document.getElementById(formId);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+</script>
+
 {% endblock %}

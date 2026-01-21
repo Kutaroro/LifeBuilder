@@ -57,11 +57,17 @@ class Personnage
     #[ORM\Column]
     private ?bool $isPublic = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
     private ?array $imagesSecondaires = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $modifiedAt = null;
 
     
     public function __construct()
@@ -287,6 +293,30 @@ class Personnage
     public function setImagesSecondaires(?array $imagesSecondaires): static
     {
         $this->imagesSecondaires = $imagesSecondaires;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getModifiedAt(): ?\DateTimeImmutable
+    {
+        return $this->modifiedAt;
+    }
+
+    public function setModifiedAt(\DateTimeImmutable $modifiedAt): static
+    {
+        $this->modifiedAt = $modifiedAt;
 
         return $this;
     }

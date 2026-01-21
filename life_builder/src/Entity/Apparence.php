@@ -30,6 +30,12 @@ class Apparence
     #[ORM\ManyToOne(inversedBy: 'apparences')]
     private ?Personnage $personnage = null;
 
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $modifiedAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -111,5 +117,29 @@ class Apparence
         $max = !empty($last) ? $last[0]->getOrdreAffichage() : 0;
 
         $this->ordreAffichage = $max + 1;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getModifiedAt(): ?\DateTimeImmutable
+    {
+        return $this->modifiedAt;
+    }
+
+    public function setModifiedAt(\DateTimeImmutable $modifiedAt): static
+    {
+        $this->modifiedAt = $modifiedAt;
+
+        return $this;
     }
 }

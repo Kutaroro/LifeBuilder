@@ -42,6 +42,20 @@ final class UtilisateurController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $file=$form->get('image')->getData();
+            if ($file) {
+                $newFilename = uniqid().'.'.$file->guessExtension();
+
+                $file->move(
+                    $this->getParameter('kernel.project_dir') . '/public/uploads/users',
+                    $newFilename
+                );
+
+                $utilisateur->setImage($newFilename);
+            }
+
+
                      
             $newPassword = $form->get('password')->getData();
 
@@ -50,12 +64,13 @@ final class UtilisateurController extends AbstractController
                 $hashedPassword = $passwordHasher->hashPassword($utilisateur, $newPassword);
                 $utilisateur->setPassword($hashedPassword);
             }
-            //Sinon on garde l'ancien
+            $utilisateur->setModifiedAt(new \DateTimeImmutable());
             $entityManager->flush();
             
             $this->addFlash('success', 'Profil mis à jour !');
-            return $this->redirectToRoute('app_utilisateur');
+            return $this->redirectToRoute('app_utilisateur', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
         }
+        
 
         return $this->render('utilisateur/edit.html.twig', [
             'utilisateur' => $utilisateur,

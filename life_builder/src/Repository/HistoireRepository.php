@@ -16,6 +16,21 @@ class HistoireRepository extends ServiceEntityRepository
         parent::__construct($registry, Histoire::class);
     }
 
+    public function findByKeyword($value, int $personnageId): array
+       {
+           return $this->createQueryBuilder('h')
+               ->where('h.personnage = :pId')
+               ->andWhere('LOWER(h.titre) LIKE LOWER(:val)
+                                  OR LOWER(h.description) LIKE LOWER(:val)
+                                  OR LOWER(h.categorie) LIKE LOWER(:val)')
+               ->setParameter('pId', $personnageId)
+               ->setParameter('val', '%'.$value.'%')
+               ->orderBy('h.id', 'ASC')
+               ->getQuery()
+               ->getResult()
+           ;
+       }
+
     //    /**
     //     * @return Histoire[] Returns an array of Histoire objects
     //     */

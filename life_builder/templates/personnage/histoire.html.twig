@@ -4,9 +4,140 @@
 
 {% block body %}
     {{ include("personnage/headerbis.html.twig") }}
-    {% for histoire in histoires %}
-        {{histoire.titre}}
-        {{histoire.categorie}}
-        {{histoire.description}}
-    {% endfor %}
+    
+    <main class="px-32 py-8">
+
+
+            <div class="flex flex-col justify-center gap-12">                
+                <div class="flex flex-col gap-8 items-center justify-center">
+                    <h3 class="text-2xl font-bold tracking-tight"> Rechercher une histoire </h1>
+
+                    <form action="{{ path('app_show_histoire', {'id' : personnage.id}) }}" method="GET" class="flex gap-2">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            placeholder="Mots clés..." 
+                            value="{{ recherche ?? '' }}"
+                            class="border-2 border-black px-4 py-2 rounded-lg"
+                        >
+                        <button type="submit" class="bg-black text-white px-4 py-2 rounded-lg">
+                            Rechercher
+                        </button>
+                    </form>
+
+                    {% if app.user == personnage.utilisateur %}
+                        <button ... onclick="toggleForm('form-ajout-histoire')" class="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-gray-300 text-gray-600 transition-colors bg-white hover:text-white hover:bg-black">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span class="font-medium">Ajouter une histoire</span>
+                        </button>
+                        <div id="form-ajout-histoire" class="hidden">
+                            {{ include('personnage/_form.html.twig', {'button_label': 'Créer'}) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <section class="flex flex-col gap-8">
+                    <h2 class="text-3xl underline font-bold tracking-tight"> Histoires de personnage </h2>
+                    <div class="flex gap-2">
+                        {% for categorie in categories %}
+                            <a href="{{ path('app_show_histoire', {'id': personnage.id, 'category': categorie.categorie}) }}" 
+                            class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
+                            {{ categorie.categorie }}
+                            </a>
+                        {% endfor %}
+                        <a href="{{ path('app_show_histoire', {'id': personnage.id }) }}" 
+                            class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
+                            Réinitialiser
+                        </a>
+                    </div>
+
+                    <div class="space-y-12 max-w-3xl">
+                        {% for histoire in histoires %}
+                        <div class="relative pl-8 border-l-2 border-gray-200 space-y-2 group">
+                            <div class="flex justify-between">
+                                <h3 class="text-xl font-bold">{{ histoire.titre }}</h3>
+                                    <div class="relative inline-block text-left dropdown-container">
+                                        <button type="button" class="dropdown-button text-gray-400 hover:text-black focus:outline-none">
+                                            <span class="text-2xl">•••</span>
+                                        </button>
+
+                                        <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black rounded-xl shadow-lg z-50 overflow-hidden">
+                                            <div class="py-1">
+                                                <button type="button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-300 flex items-center gap-2"
+                                                        onclick="toggleForm('form-histoire{{ histoire.id }}')">
+                                                        Modifier l'ordre d'affichage
+                                                </button>
+                                                <a href="{{path('app_histoire_edit', {'id' : histoire.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                                    Modifier
+                                                </a>
+                                                {{ include('histoire/_delete_form.html.twig') }}
+                                                
+                                            </div>
+                                        </div>
+
+                                        <form id="form-histoire{{ histoire.id }}" 
+                                            action="{{ path('app_personnage_histoire_ordre', {'personnageId': personnage.id, 'histoireId': histoire.id}) }}" 
+                                            method="POST"
+                                            class="hidden mt-3 p-3 bg-gray-100 rounded">
+                                            <label for="ordreAffichage-{{ histoire.id }}" class="block text-gray-700 mb-1">
+                                                Nouvel ordre d'affichage:
+                                            </label>
+                                            <input type="number" id="ordreAffichage-{{ histoire.id }}" name="ordreAffichage"
+                                                min="1" required
+                                                class="border rounded px-2 py-1 w-20">
+                                            <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
+                                            <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
+                                                    onclick="toggleForm('form-histoire{{ histoire.id }}')">Annuler</button>
+                                        </form>
+
+
+                                    </div>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed">{{ histoire.description }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+    </main>
+
+<script>
+        function toggleForm(formId,isAnswer=false) {
+            const form = document.getElementById(formId);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+
+    document.addEventListener('click', function(event) {
+        // 1. On cherche si on a cliqué sur un bouton dropdown
+        const btn = event.target.closest('.dropdown-button');
+        const container = event.target.closest('.dropdown-container');
+
+        // Si on clique sur un bouton, on bascule son menu
+        if (btn && container) {
+            const menu = container.querySelector('.dropdown-menu');
+            
+            // On ferme les autres menus ouverts avant d'ouvrir celui-ci
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) m.classList.add('hidden');
+            });
+
+            menu.classList.toggle('hidden');
+            event.stopPropagation(); // Empêche la fermeture immédiate
+        } 
+        // 2. Si on clique n'importe où ailleurs, on ferme tous les menus
+        else {
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                m.classList.add('hidden');
+            });
+        }
+    });
+
+</script>
+
 {% endblock %}

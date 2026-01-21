@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Histoire;
+use App\Entity\Personnage;
 use App\Form\HistoireType;
 use App\Repository\HistoireRepository;
 use App\Repository\PersonnageRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,37 +34,31 @@ final class HistoireController extends AbstractController
         ]);
     }
 
-    #[Route('/new/{id}', name: 'app_histoire_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, PersonnageRepository $personnageRepository, EntityManagerInterface $entityManager, int $id): Response
-    {
-        $histoire = new Histoire();
-        $form = $this->createForm(HistoireType::class, $histoire);
-        $form->handleRequest($request);
+    // #[Route('/new/{id}', name: 'app_histoire_new', methods: [ 'POST'])]
+    // public function new(Request $request, PersonnageRepository $personnageRepository, EntityManagerInterface $entityManager, int $id)
+    // {
+    //     $histoire = new Histoire();
+    //     $form = $this->createForm(HistoireType::class, $histoire);
+    //     $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $personnage=$personnageRepository->findOneBy(['id' => $id]);
-            $histoire->setPersonnage($personnage);
-            $entityManager->persist($histoire);
-            $entityManager->flush();
-            $this->reorganisation($entityManager);
+    //     if ($form->isSubmitted() && $form->isValid()) {
+    //         $personnage=$personnageRepository->findOneBy(['id' => $id]);
+    //         $histoire->setPersonnage($personnage);
+    //         $entityManager->persist($histoire);
+    //         $entityManager->flush();
+    //         $this->reorganisation($entityManager);
 
-            return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
-        }
+    //         return $this->redirectToRoute('app_show_histoire', ['id'=>$personnage->getId()], Response::HTTP_SEE_OTHER);
+    //     }
+    // }
 
-        return $this->render('histoire/new.html.twig', [
-            'histoire' => $histoire,
-            'form' => $form,
-            'id'=>$id,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_histoire_show', methods: ['GET'])]
-    public function show(Histoire $histoire): Response
-    {
-        return $this->render('histoire/show.html.twig', [
-            'histoire' => $histoire,
-        ]);
-    }
+    // #[Route('/{id}', name: 'app_histoire_show', methods: ['GET'])]
+    // public function show(Histoire $histoire): Response
+    // {
+    //     return $this->render('histoire/show.html.twig', [
+    //         'histoire' => $histoire,
+    //     ]);
+    // }
 
     #[Route('/{id}/edit/', name: 'app_histoire_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Histoire $histoire, EntityManagerInterface $entityManager): Response
@@ -71,6 +67,8 @@ final class HistoireController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $histoire->setModifiedAt(new DateTimeImmutable());
+
             $entityManager->flush();
 
             return $this->redirectToRoute('app_histoire_index', [], Response::HTTP_SEE_OTHER);
@@ -90,7 +88,69 @@ final class HistoireController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_histoire_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_personnage_show', ['id'=>$histoire->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
+    }
+
+
+    #[Route('{id}/histoire/{category}', name: 'app_show_histoire', methods: ['GET','POST'])]
+    public function showHistoire(Personnage $personnage, Request $request, EntityManagerInterface $entityManager, HistoireRepository $histoireRepository, ?string $category = null ): Response
+    {   
+        // Créer une histoire
+        $histoire = new Histoire();
+        $form = $this->createForm(HistoireType::class, $histoire);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $histoire->setPersonnage($personnage);
+            $histoire->setCreatedAt(new DateTimeImmutable());
+            $histoire->setModifiedAt(new DateTimeImmutable());
+            $entityManager->persist($histoire);
+            $entityManager->flush();
+            $this->reorganisation($entityManager);
+
+            return $this->redirectToRoute('app_show_histoire', ['id'=>$personnage->getId()], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($category) {
+            $histoires = $entityManager->getRepository(Histoire::class)->findBy([
+                'personnage' => $personnage,
+                'categorie' => $category
+            ]);
+        } else {
+            $histoires = $personnage->getHistoires()->toArray();
+        }
+
+
+        $categories = $entityManager->getRepository(Histoire::class)
+                ->createQueryBuilder('h')
+                ->select('DISTINCT h.categorie')
+                ->where('h.personnage = :p')
+                ->andWhere('h.categorie IS NOT NULL') 
+                ->andWhere("h.categorie != ''")      
+                ->setParameter('p', $personnage)
+                ->getQuery()
+                ->getResult();
+
+        $query = $request->query->get('search');
+
+        if ($query) {
+            $histoires = $histoireRepository->findByKeyword($query, $personnage->getId());
+        }
+
+
+        usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
+            $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+            $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+            return $av <=> $bv;
+        });
+
+        return $this->render('personnage/histoire.html.twig', [
+            'histoires' => $histoires,
+            'personnage' => $personnage,
+            'form'=>$form,
+            'categories'=>$categories,
+            'recherche' => $query
+        ]);      
     }
 
 

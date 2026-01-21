@@ -12,6 +12,7 @@ use App\Form\ReponseType;
 use App\Repository\ApparenceRepository;
 use App\Repository\HistoireRepository;
 use App\Repository\PersonnageRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,9 +53,38 @@ final class PersonnageController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $personnage->setUtilisateur($this->getUser());
+            $file=$form->get('image')->getData();
+            if ($file) {
+                $newFilename = uniqid().'.'.$file->guessExtension();
+
+                $file->move(
+                    $this->getParameter('kernel.project_dir') . '/public/uploads/personnages',
+                    $newFilename
+                );
+
+                $personnage->setImage($newFilename);
+            }
+            $files = $form->get('imagesSecondaires')->getData();
+            
+            $imagesArray = $personnage->getImagesSecondaires() ?? [];
+            if ($files) {
+                foreach ($files as $file) {
+                    $newFilename = uniqid().'.'.$file->guessExtension();
+
+                    $file->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/personnages',
+                        $newFilename
+                    );
+                    $imagesArray[] = $newFilename;
+                }
+            }
+            $personnage->setImagesSecondaires($imagesArray);
+            $personnage->setCreatedAt(new DateTimeImmutable());
+            $personnage->setModifiedAt(new DateTimeImmutable());
+
+            
             $entityManager->persist($personnage);
             $entityManager->flush();
-
             return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -78,18 +108,9 @@ final class PersonnageController extends AbstractController
             $histoires = $personnage->getHistoires()->toArray();
         }
       
-        usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
-            $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
-            $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
-            return $av <=> $bv;
-        });
+        
 
         $apparences = $personnage->getApparences()->toArray();
-        usort($apparences, function($a, $b) { 
-            $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
-            $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
-            return $av <=> $bv;
-        });
 
         $commentaires= $personnage->getCommentaires()->toArray();
 
@@ -144,12 +165,26 @@ final class PersonnageController extends AbstractController
             ->getResult();
 
         $categories = $entityManager->getRepository(Histoire::class)
-            ->createQueryBuilder('h')
-            ->select('DISTINCT h.categorie')
-            ->andWhere('h.personnage = :p')
-            ->setParameter('p', $personnage)
-            ->getQuery()
-            ->getResult();
+                ->createQueryBuilder('h')
+                ->select('DISTINCT h.categorie')
+                ->where('h.personnage = :p')
+                ->andWhere('h.categorie IS NOT NULL') 
+                ->andWhere("h.categorie != ''")      
+                ->setParameter('p', $personnage)
+                ->getQuery()
+                ->getResult();
+
+        usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
+            $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+            $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+            return $av <=> $bv;
+        });
+
+        usort($apparences, function($a, $b) { 
+            $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
+            $bv = $b->getOrdreAffichage() ?? PHP_INT_MAX;
+            return $av <=> $bv;
+        });
 
 
         return $this->render('personnage/show.html.twig', [
@@ -197,24 +232,19 @@ final class PersonnageController extends AbstractController
             $imagesArray = $personnage->getImagesSecondaires() ?? [];
             if ($files) {
                 foreach ($files as $file) {
-                    // On génère un nom unique pour éviter les doublons
                     $newFilename = uniqid().'.'.$file->guessExtension();
 
-                    // On déplace le fichier dans le dossier public/uploads/personnages
-                    // (Assure-toi que ce dossier existe)
                     $file->move(
                         $this->getParameter('kernel.project_dir') . '/public/uploads/personnages',
                         $newFilename
                     );
-
-                    // On ajoute le nom du fichier au tableau
                     $imagesArray[] = $newFilename;
                 }
             }
-
-            // 3. On enregistre le tableau mis à jour
             $personnage->setImagesSecondaires($imagesArray);
+            $personnage->setModifiedAt(new DateTimeImmutable());
 
+            $entityManager->persist($personnage);
             $entityManager->flush();
             return $this->redirectToRoute('app_personnage_index');
         }
@@ -247,13 +277,10 @@ final class PersonnageController extends AbstractController
 
 //================================= Méthodes persos =================================//
 
-    #[Route('/personnageLie/ajout', name: 'app_add_persoLie', methods: ['POST'])]
-    public function addPersoLie(Request $request, EntityManagerInterface $em): Response
+    #[Route('{id}/personnageLie/ajout', name: 'app_add_persoLie', methods: ['POST'])]
+    public function addPersoLie(Request $request, EntityManagerInterface $em, Personnage $personnage): Response
     {
-        $personnageId = $request->request->getInt('personnageId'); // ID du personnage actuel
         $persoLieId = $request->request->getInt('persoLies');     // ID du personnage lié sélectionné
-
-        $personnage = $em->getRepository(Personnage::class)->findOneBy(['id' => $personnageId]);
         $personnageLi = $em->getRepository(Personnage::class)->findOneBy(['id' => $persoLieId]);
 
         if ($personnage && $personnageLi) {
@@ -262,44 +289,31 @@ final class PersonnageController extends AbstractController
             $em->flush();
         }
 
-        return $this->redirectToRoute('app_personnage_show', ['id' => $personnageId]);
+        return $this->redirectToRoute('app_show_persoLie', ['id' => $personnage->getID()]);
     }
 
     #[Route('{id}/personnageLie/', name: 'app_show_persoLie', methods: ['GET','POST'])]
-    public function showPersoLie(Personnage $personnage): Response
+    public function showPersoLie(Personnage $personnage, EntityManagerInterface $entityManager): Response
     {
+        $personnagesPublics = $entityManager->getRepository(Personnage::class)
+            ->createQueryBuilder('p')
+            ->andWhere('p.isPublic = :public')
+            ->andWhere('p.id != :id')
+            ->setParameter('public', true)
+            ->setParameter('id', $personnage->getId())
+            ->orderBy('p.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
 
         return $this->render('personnage/persoLie.html.twig', [
-            'personnagesLies' => $personnagesLies = $personnage->getPersoLies(),
+            'personnagesLies' => $personnage->getPersoLies(),
             'personnage' => $personnage,
+            'personnagesPublics'=> $personnagesPublics
         ]);
 
     }
 
-    #[Route('{id}/apparence/', name: 'app_show_apparence', methods: ['GET','POST'])]
-    public function showApparence(Personnage $personnage): Response
-    {
-
-        return $this->render('personnage/apparence.html.twig', [
-            'apparences' => $apparences = $personnage->getApparences(),
-            'personnage' => $personnage,
-        ]);    
-    }
-
-    #[Route('{id}/histoire/', name: 'app_show_histoire', methods: ['GET','POST'])]
-    public function showHistoire(Personnage $personnage): Response
-    {
-
-        return $this->render('personnage/histoire.html.twig', [
-            'histoires' => $histoires = $personnage->getHistoires(),
-            'personnage' => $personnage,
-        ]);      
-    }
-
-
-
-
-
+    
 
 
     //Permet de reorganiser la liste si l'utilisateur change l'ordre d'affichage 

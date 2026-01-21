@@ -6,10 +6,12 @@ use App\Entity\ModStatus;
 use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Image;
 
 class UtilisateurType extends AbstractType
 {
@@ -27,7 +29,14 @@ class UtilisateurType extends AbstractType
                 'second_options' => ['label' => 'Repeat Password'],   
             ])
             ->add('description')
-            ->add('image')
+            ->add('image', FileType::class, [
+                'label' => 'Image Principale',
+                'mapped' => false, 
+                'required' => false,
+                'constraints' => [
+                    new Image(['maxSize' => '2M'])
+                ]
+            ])
         ;
     }
 

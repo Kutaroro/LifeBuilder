@@ -1,0 +1,18 @@
+<footer>
+    <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+        <a href="{{ path('app_personnage_catalogue') }}" class="text-3xl font-bold text-gray-800">C'est temp jsp quoi mettre</a>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="{{ path('app_personnage_catalogue') }}" class="text-gray-600 hover:text-gray-800">Tous les personnages </a></li>
+                <li><a href="{{ path('app_personnage_index') }}" class="text-gray-600 hover:text-gray-800">Mes personnages</a></li>
+                <li><a href="{{ path('app_utilisateur', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mon profil</a></li>
+                {% if app.user %}
+                    <li><a href="{{ path('app_logout') }}" class="text-gray-600 hover:text-gray-800">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ path('app_login') }}" class="text-gray-600 hover:text-gray-800">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+</footer>

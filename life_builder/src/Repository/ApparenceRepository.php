@@ -16,6 +16,21 @@ class ApparenceRepository extends ServiceEntityRepository
         parent::__construct($registry, Apparence::class);
     }
 
+    public function findByKeyword($value, int $personnageId): array
+       {
+           return $this->createQueryBuilder('a')
+               ->where('a.personnage = :pId')
+               ->andWhere('LOWER(a.titre) LIKE LOWER(:val)
+                                  OR LOWER(a.description) LIKE LOWER(:val)
+                                 ')
+               ->setParameter('pId', $personnageId)
+               ->setParameter('val', '%'.$value.'%')
+               ->orderBy('a.id', 'ASC')
+               ->getQuery()
+               ->getResult()
+           ;
+       }
+
     //    /**
     //     * @return Apparence[] Returns an array of Apparence objects
     //     */
