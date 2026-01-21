@@ -99,6 +99,14 @@ final class SignalementController extends AbstractController
             $signalement->setDate(new \DateTimeImmutable());
             $signalement->setStatus('En attente');
             $signalement->setType('Personnage');
+            $nbSig=$personnage->getUtilisateur()->getStatus()->getNbSig();
+            if($nbSig===null){
+                $nbSig=0;
+            }
+            else{
+                $nbSig++;
+            }
+            $personnage->getUtilisateur()->getStatus()->setNbSig($nbSig);
             $entityManager->persist($signalement);
             $entityManager->flush();
 

@@ -15,8 +15,7 @@ class ModStatusType extends AbstractType
             ->add('status')
             ->add('type')
             ->add('duree')
-            ->add('nbSig')
-            ->add('sanctions')
+            ->add('description')
         ;
     }
 

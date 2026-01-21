@@ -25,6 +25,28 @@
                                 <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.05 8.93a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.27.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
                             </svg>
                         </a>
+                    {% elseif is_granted("ROLE_ADMIN") or is_granted("ROLE_MODERATOR") %}
+                        <div class="dropdown-container">
+                            <button type="button" class="dropdown-button text-gray-400 hover:text-blue-500 transition-colors duration-200"
+                                    title="Gérer le profil de {{ utilisateur.nom }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.05 8.93a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.27.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                                </svg>
+                            </button>
+
+                            <div class="dropdown-menu hidden absolute  mt-2 w-48 bg-white border-2 border-black rounded-xl shadow-lg z-50 overflow-hidden">
+                                <div class="py-1">
+                
+                                    <a href="{{path('app_mod_status_edit', {'id' :utilisateur.status.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                        Appliquer une sanction
+                                    </a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                        Bannir l'utilisateur (Pas actif)
+                                   </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
 
@@ -32,8 +54,15 @@
                 <div class="mb-8">
                     {% if "ROLE_ADMIN" in utilisateur.roles %}
                         <span class="text-xl text-gray-400 font-medium">Administrateur</span>
+                    {% elseif "ROLE_MODERATOR" in utilisateur.roles %}
+                        <span class="text-xl text-gray-400 font-medium">Modérateur</span>
                     {% else %}
                         <span class="text-xl text-gray-400 font-medium">Utilisateur</span>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if utilisateur.status.status != "Pas de sanction en cours" %}
+                        <span class="text-xl text-red-500 font-medium">{{ utilisateur.status.status }}</span>
                     {% endif %}
                 </div>
 
@@ -64,7 +93,7 @@
         <section class="mb-8">
             <div class="flex gap-6 pb-2 mb-6">
                 <h2 class="text-3xl font-bold text-black items-baseline border-b-2 border-black">Personnages récents</h2>
-                <a href="#" class="mt-4 text-sm font-semibold text-gray-600 underline hover:text-black decoration-2 underline-offset-4">
+                <a href="{{ path('app_personnage_index', {'id': utilisateur.id}) }}" class="mt-4 text-sm font-semibold text-gray-600 underline hover:text-black decoration-2 underline-offset-4">
                     (voir tous les personnages)
                 </a>
             </div>
@@ -113,4 +142,33 @@
 
     </div>
 </main>
+
+
+<script>
+document.addEventListener('click', function(event) {
+        // 1. On cherche si on a cliqué sur un bouton dropdown
+        const btn = event.target.closest('.dropdown-button');
+        const container = event.target.closest('.dropdown-container');
+
+        // Si on clique sur un bouton, on bascule son menu
+        if (btn && container) {
+            const menu = container.querySelector('.dropdown-menu');
+            
+            // On ferme les autres menus ouverts avant d'ouvrir celui-ci
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) m.classList.add('hidden');
+            });
+
+            menu.classList.toggle('hidden');
+            event.stopPropagation(); // Empêche la fermeture immédiate
+        } 
+        // 2. Si on clique n'importe où ailleurs, on ferme tous les menus
+        else {
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                m.classList.add('hidden');
+            });
+        }
+    });
+
+</script>
 {% endblock %}

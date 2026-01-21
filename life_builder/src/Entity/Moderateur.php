@@ -6,7 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 class Moderateur extends Utilisateur 
-{
+{   
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $category = null;
    
 

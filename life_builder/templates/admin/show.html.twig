@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Signalement #{{ signalement.id }}{% endblock %}
+
+{% block body %}
+
+<main class="max-w-4xl mx-auto p-8">
+    <div class="mb-12">
+        <a href="{{ path('app_admin') }}" class="text-gray-500 hover:text-gray-800 text-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+
+    <div class="flex justify-between items-start mb-10">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Signalement #{{ signalement.id }}</h1>
+            <p class="text-gray-500 mt-2">Reçu le {{ signalement.date|date('d/m/Y à H:i') }}</p>
+        </div>
+        
+        <div class="flex flex-col items-end">
+            <span class="px-4 py-2 rounded-xl border-2 font-semibold 
+                {% if signalement.status == 'Traité' %} border-green-200 bg-green-50 text-green-700
+                {% elseif signalement.status == 'En cours de traitement' %} border-blue-200 bg-blue-50 text-blue-700
+                {% else %} border-gray-200 bg-gray-50 text-gray-700 {% endif %}">
+                {{ signalement.status }}
+            </span>
+            {% if signalement.mod %}
+                <p class="text-xs text-gray-400 mt-2 italic">Assigné à : {{ signalement.mod.nom }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="md:col-span-2 space-y-8">
+            <section class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">Motif du signalement</h2>
+                <p class="text-xl font-semibold text-gray-800 mb-4 italic">"{{ signalement.titre }}"</p>
+                <div class="prose max-w-none text-gray-600 leading-relaxed">
+                    {{ signalement.description|nl2br }}
+                </div>
+            </section>
+
+            {% if signalement.personnage %}
+            <section class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">Élément visé</h2>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                        <i class="fa-solid fa-mask"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-900">Personnage : {{ signalement.personnage.nom }}</p>
+                        <p class="text-sm text-gray-500 text-purple-600 underline cursor-pointer">Voir la fiche du personnage</p>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-gray-50 rounded-2xl p-6 space-y-6">
+                <div>
+                    <h3 class="text-xs font-bold uppercase text-gray-400 mb-3">Utilisateur signalé</h3>
+                    <a href="{{ path('app_utilisateur', {'id': signalement.utilisateur.id}) }}">
+                        <p class="font-bold text-gray-900">{{ signalement.utilisateur.nom }}</p>
+                    </a>
+                    <p class="text-xs text-gray-500">{{ signalement.utilisateur.email }}</p>
+                    <p class=" text-gray-500"> Nombre de signalements en ce moment: <b> {{ signalement.utilisateur.signalements|length }}</b></p>
+                </div>
+                
+                <hr class="border-gray-200">
+
+                <div>
+                    <h3 class="text-xs font-bold uppercase text-gray-400 mb-3">Signalé par</h3>
+                    <p class="font-bold text-gray-900">{{ signalement.reportedBy.nom }}</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                {% if signalement.status == 'En attente' %}
+                    <form action="{{ path('app_signalement_take', {'id': signalement.id}) }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token('take' ~ signalement.id) }}">
+                        <button class="w-full bg-gray-600 hover:bg-black text-white font-bold py-3 rounded-xl transition">
+                            Prendre le ticket
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if signalement.status == 'En cours de traitement' and signalement.mod == app.user %}
+                    <form action="{{ path('app_signalement_close', {'id': signalement.id}) }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token('close' ~ signalement.id) }}">
+                        <button class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
+                            Marquer comme traité
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

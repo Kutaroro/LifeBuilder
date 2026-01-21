@@ -4,7 +4,7 @@
         <nav>
             <ul class="flex space-x-4">
                 <li><a href="{{ path('app_personnage_catalogue') }}" class="text-gray-600 hover:text-gray-800">Tous les personnages </a></li>
-                <li><a href="{{ path('app_personnage_index') }}" class="text-gray-600 hover:text-gray-800">Mes personnages</a></li>
+                <li><a href="{{ path('app_personnage_index', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mes personnages</a></li>
                 <li><a href="{{ path('app_utilisateur', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mon profil</a></li>
                 {% if app.user %}
                     <li><a href="{{ path('app_logout') }}" class="text-gray-600 hover:text-gray-800">Logout</a></li>

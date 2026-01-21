@@ -12,6 +12,7 @@ use App\Form\ReponseType;
 use App\Repository\ApparenceRepository;
 use App\Repository\HistoireRepository;
 use App\Repository\PersonnageRepository;
+use App\Repository\UtilisateurRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,16 +26,17 @@ use Symfony\Component\Form\FormFactoryInterface;
 #[Route('/personnage')]
 final class PersonnageController extends AbstractController
 {
-    #[Route(name: 'app_personnage_index', methods: ['GET'])]
-    public function index(PersonnageRepository $personnageRepository): Response
+    #[Route('/index/{id}', name: 'app_personnage_index', methods: ['GET'])]
+    public function index(PersonnageRepository $personnageRepository, Utilisateur $utilisateur): Response
     {   
+     
         return $this->render('personnage/index.html.twig', [
             'personnages' => $personnageRepository->findBy(
-            ['utilisateur' => $this->getUser()]),
+            ['utilisateur' => $utilisateur]),
         ]);
     }
 
-    #[Route('/catalogue', name: 'app_personnage_catalogue', methods: ['GET'])]
+    #[Route(name: 'app_personnage_catalogue', methods: ['GET'])]
     public function catalogue(PersonnageRepository $personnageRepository): Response
     {   
         $personnages = $personnageRepository->findAll();
@@ -85,7 +87,7 @@ final class PersonnageController extends AbstractController
             
             $entityManager->persist($personnage);
             $entityManager->flush();
-            return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_personnage_index', ['id' => $this->getUser()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('personnage/new.html.twig', [
@@ -246,7 +248,7 @@ final class PersonnageController extends AbstractController
 
             $entityManager->persist($personnage);
             $entityManager->flush();
-            return $this->redirectToRoute('app_personnage_index');
+            return $this->redirectToRoute('app_personnage_index', ['id' => $personnage->getUtilisateur()->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('personnage/edit.html.twig', [
@@ -271,7 +273,7 @@ final class PersonnageController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_personnage_index', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
     }
 
 

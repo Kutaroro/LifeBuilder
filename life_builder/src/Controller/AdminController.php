@@ -6,45 +6,66 @@ use App\Entity\Moderateur;
 use App\Entity\Signalement;
 use App\Entity\Utilisateur;
 use App\Repository\SignalementRepository;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\ByteString;
 
 final class AdminController extends AbstractController
 {
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_MODERATOR")'))]
     #[Route('/admin', name: 'app_admin')]
-    public function index(EntityManagerInterface $entityManager,SignalementRepository $signalementRepository): Response
+    public function index(SignalementRepository $signalementRepository): Response
     {
-    
-        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_MODERATOR')) {
-            throw $this->createAccessDeniedException();
-        }
 
         $user = $this->getUser();
         $reports = [];
-        dump($reports);
+
         if ($this->isGranted('ROLE_ADMIN')) {
-            $reports = $entityManager->getRepository(Signalement::class)->findAll();
-            
+            $reports = $signalementRepository->findAll();
         } 
-        
         elseif ($user instanceof Moderateur) {
             $categorie = $user->getCategory(); 
-
-            if ($categorie === 'Personnage') {
-                $reports = $signalementRepository->findByType('Personnage','Traité');
-                dump($reports);
-            } else if ($categorie === 'Utilisateur'){
-                $reports = $signalementRepository->findByType('Utilisateur','Traité');
-                dump($reports);
-            }
+            dump($categorie);
+            $reports = $signalementRepository->findByType($categorie, 'Traité');
         }
 
         return $this->render('admin/index.html.twig', [
             'reports' => $reports,
+        ]);
+    }
+
+
+    #[IsGranted(new Expression(
+    'is_granted("ROLE_ADMIN") or (is_granted("ROLE_MODERATOR") and user.getCategory() == "Utilisateur")'))]
+    #[Route('/admin/utilisateurs', name: 'app_admin_utilisateurs')]
+    public function utilisateurs(UtilisateurRepository $utilisateurRepository): Response
+    {
+
+        $user = $this->getUser();
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $users = $utilisateurRepository->findAllForAdmin();
+        } 
+        elseif ($user instanceof Moderateur) {
+            $users = $utilisateurRepository->findAllForMods();
+        }
+
+        return $this->render('admin/users.html.twig', [
+            'users' => $users,
+        ]);
+    }
+
+    #[Route('/admin/signlement/{id}', name: 'app_admin_show')]
+    public function show(Signalement $signalement): Response
+    {   
+
+        return $this->render('admin/show.html.twig', [
+            'signalement' => $signalement,
         ]);
     }
 
@@ -68,8 +89,8 @@ final class AdminController extends AbstractController
 
         $modoP = new Moderateur();
         $modoP->setEmail('modoP@test.com');
-        $modoP->setRoles(['ROLE_MODERATOR']); // On lui donne son rôle
-        $modoP->setCategory('Personnage');     // On remplit le champ spécifique à l'enfant
+        $modoP->setRoles(['ROLE_MODERATOR']); 
+        $modoP->setCategory('Personnage');   
         $modoP->setPassword($passwordHasher->hashPassword($modoP, 'modoP@test.com'));
         $modoP->setNom(ByteString::fromRandom(8)->toString());
         $modoP->setCreatedAt(new \DateTimeImmutable());

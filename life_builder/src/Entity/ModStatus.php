@@ -16,17 +16,20 @@ class ModStatus
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $type = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateInterval $duree = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $nbSig = null;
 
     #[ORM\Column]
     private array $sanctions = [];
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $description = null;
 
     public function getId(): ?int
     {
@@ -81,15 +84,17 @@ class ModStatus
         return $this;
     }
 
-    public function getSanctions(): array
+    public function getDescription(): ?string
     {
-        return $this->sanctions;
+        return $this->description;
     }
 
-    public function setSanctions(array $sanctions): static
+    public function setDescription(?string $description): static
     {
-        $this->sanctions = $sanctions;
+        $this->description = $description;
 
         return $this;
     }
+
+    
 }

@@ -1,49 +1,104 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AdminController!{% endblock %}
+{% block title %}Signalements actifs{% endblock %}
 
 {% block body %}
-<main>  
 
-    <h1>Bienvenue dans le panneau d'administration</h1>
+{% if is_granted("ROLE_ADMIN") or (is_granted("ROLE_MODERATOR") and app.user.category == 'Utilisateur') %}
+    {{ include("admin/headerbis.html.twig") }}
+{% endif %}
 
-    <section>
-        <h2>Signalements récents</h2>
-        {% if reports is empty %}
-            <p>Aucun signalement à afficher.</p>
-        {% else %}
-            <ul>
-                {% for report in reports %}
-                    <li>
-                        <strong>Catégorie: {{ report.type }}</strong> 
-                        - <strong>{{ report.titre}} </strong>
-                        - {{ report.description }} 
-                        - Utilisateur concerné: {{ report.utilisateur.nom}}
-                        {% if report.personnage %}
-                            (Personnage reporté: {{ report.personnage.nom }})
-                        {% endif %}
-                         (Signalé par : {{ report.reportedBy.nom }} le {{ report.date|date('d/m/Y H:i') }})
-                         {% if report.status == 'En cours de traitement' %}
-                            - <em>Status: En cours de traitement par {{ report.mod.nom }}</em>
-                        {% else %}
-                            - <em>Status: {{ report.status }}</em>
-                        {% endif %}
-                        {% if report.status == 'En attente' %}
-                            <form action="{{ path('app_signalement_take', {'id':report.id}) }}" method="post" style="display:inline;">
-                                <input type="hidden" name="_token" value="{{ csrf_token('take' ~ report.id) }}">
-                                <button type="submit" class="btn btn-primary">Prendre le ticket</button>
+<main class="max-w-6xl mx-auto p-8">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-12">
+        <div class="w-1/3">
+            <a href="#" class="text-gray-500 hover:text-gray-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-chevron-left"></i> Retour
+            </a>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900">Tous les signalements actifs</h1>
+
+        <div class="relative w-full md:w-1/3 mt-4 md:mt-0">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+            </span>
+            <input type="text" class="block w-full pl-10 pr-3 py-2 border border-transparent rounded-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-purple-200 text-sm" placeholder="Rechercher">
+        </div>
+    </div>
+
+    <div class="space-y-12">
+        {% for report in reports %}
+            {% if report.status != 'Traité' %}
+                <div class="flex items-start group">
+
+                    <div class="flex-1 space-y-1">
+                        <a href="{{ path('app_admin_show', {'id': report.id}) }}" class="hover:underline">
+                            <h3 class="text-xl font-bold text-gray-900">
+                                {{ report.titre }}
+                                <span class="font-normal text-gray-500 ml-2">({{ report.date|date('d/m/Y') }})</span>
+                            </h3>
+                        </a>
+                        <h2 class="font-bold text-gray-500">Catégorie {{report.type}}</h2>
+                        
+                        <p class="text-lg text-gray-900">
+                            Utilisateur signalé <span class="font-bold">“{{ report.utilisateur.nom }}”</span> 
+                            {% if report.personnage %} (Personnage : “{{ report.personnage.nom }}”) {% endif %}
+                            - Signalé par <span class="font-bold">“{{ report.reportedBy.nom }}”</span>
+                        </p>
+                        
+                        <p class="text-gray-500 leading-relaxed max-w-3xl">
+                            {{ report.description }}
+                        </p>
+                    </div>
+
+                    <div class="ml-8 flex flex-col items-end justify-center self-center min-w-[200px]">
+                        {% if report.status == 'En cours de traitement' %}
+                            <p class="text-gray-600 text-lg text-right leading-tight">
+                                En cours de traitement par<br>
+                                <span class="font-bold">“{{ report.mod.nom }}”</span>
+                            </p>
+                            
+                            {# Bouton pour clôturer quand on a fini #}
+                            <form action="{{ path('app_signalement_close', {'id': report.id}) }}" method="post" class="mt-4">
+                                <input type="hidden" name="_token" value="{{ csrf_token('close' ~ report.id) }}">
+                                <button type="submit" class="text-sm font-bold text-green-600 hover:underline">Marquer comme traité</button>
                             </form>
-                        {% endif %}
-                            <form action="{{ path('app_signalement_close', {'id': report.id}) }}" method="post" style="display:inline;">
-                            <input type="hidden" name="_token" value="{{ csrf_token('close' ~ report.id) }}">
-                            <button type="submit" class="btn btn-success">Marquer comme traité</button>
-                        </form>
-                    </li>
-                {% endfor %}
-                
-            </ul>
-        {% endif %}
-    </section>
 
+                        {% elseif report.status == 'En attente' or report.status == 'Non Traité' %}
+                            <div class="flex flex-col items-end gap-3">
+                                <span class="px-6 py-2 rounded-xl border-2 border-gray-300 text-xl font-medium text-gray-700 bg-white">
+                                    Non Traité
+                                </span>
+                                
+                                <form action="{{ path('app_signalement_take', {'id':report.id}) }}" method="post">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('take' ~ report.id) }}">
+                                    <button type="submit" class="text-sm font-bold text-indigo-600 hover:underline">Prendre le ticket</button>
+                                </form>
+                            </div>
+                        {# {% else %}
+                            <span class="text-gray-400 italic">{{ report.status }}</span> #}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-20">
+                <p class="text-gray-400 text-lg italic">Aucun signalement à afficher pour le moment.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="flex justify-center items-center mt-20 space-x-6">
+        <button class="text-gray-400 hover:text-gray-800 text-3xl font-light">&lt;</button>
+        <div class="flex space-x-4 text-2xl">
+            <span class="cursor-pointer text-gray-400">1</span>
+            <span class="cursor-pointer text-blue-500 font-bold">2</span>
+            <span class="text-gray-300">...</span>
+            <span class="cursor-pointer text-gray-400">3</span>
+            <span class="cursor-pointer text-gray-400">4</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-800 text-3xl font-light">&gt;</button>
+    </div>
 </main>
+
 {% endblock %}

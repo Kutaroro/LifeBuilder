@@ -7,5 +7,5 @@
 
     {{ include('apparence/_form.html.twig') }}
 
-    <a href="{{ path('app_personnage_index') }}">back to list</a>
+    <a href="{{ path('app_personnage_index', {'id': app.user.id}) }}">back to list</a>
 {% endblock %}

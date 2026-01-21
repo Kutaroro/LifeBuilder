@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\ModStatus;
+use App\Entity\Utilisateur;
 use App\Form\ModStatusType;
 use App\Repository\ModStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,33 +23,43 @@ final class ModStatusController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_mod_status_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/newStatus/{id}', name: 'app_sanction', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, ModStatus $modStatus): Response
     {
-        $modStatus = new ModStatus();
-        $form = $this->createForm(ModStatusType::class, $modStatus);
-        $form->handleRequest($request);
+        // $form = $this->createForm(ModStatusType::class, $modStatus);
+        // $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        // if ($form->isSubmitted() && $form->isValid()) {
+        //     $entityManager->persist($modStatus);
+        //     $entityManager->flush();
+
+        //     return $this->redirectToRoute('app_mod_status_index', [], Response::HTTP_SEE_OTHER);
+        // }
+
+        // return $this->render('mod_status/new.html.twig', [
+        //     'mod_status' => $modStatus,
+        //     'form' => $form,
+        // ]);
+        if ($this->isCsrfTokenValid('create'.$modStatus->getId(), $request->getPayload()->getString('_token'))) {
+
+            $modStatus->setStatus('Pas de sanction en cours');
+            $modStatus->setNbSig(0);
             $entityManager->persist($modStatus);
             $entityManager->flush();
-
-            return $this->redirectToRoute('app_mod_status_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('mod_status/new.html.twig', [
-            'mod_status' => $modStatus,
-            'form' => $form,
-        ]);
+        return $this->redirectToRoute('app_personnage_catalogue', [], Response::HTTP_SEE_OTHER);
+
+
     }
 
-    #[Route('/{id}', name: 'app_mod_status_show', methods: ['GET'])]
-    public function show(ModStatus $modStatus): Response
-    {
-        return $this->render('mod_status/show.html.twig', [
-            'mod_status' => $modStatus,
-        ]);
-    }
+    // #[Route('/{id}', name: 'app_mod_status_show', methods: ['GET'])]
+    // public function show(ModStatus $modStatus): Response
+    // {
+    //     return $this->render('mod_status/show.html.twig', [
+    //         'mod_status' => $modStatus,
+    //     ]);
+    // }
 
     #[Route('/{id}/edit', name: 'app_mod_status_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, ModStatus $modStatus, EntityManagerInterface $entityManager): Response
@@ -59,7 +70,8 @@ final class ModStatusController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_mod_status_index', [], Response::HTTP_SEE_OTHER);
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['status' => $modStatus]);
+            return $this->redirectToRoute('app_utilisateur', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('mod_status/edit.html.twig', [
@@ -75,7 +87,10 @@ final class ModStatusController extends AbstractController
             $entityManager->remove($modStatus);
             $entityManager->flush();
         }
+        $utilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['status' => $modStatus]);
 
-        return $this->redirectToRoute('app_mod_status_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_utilisateur', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
     }
+
+
 }

@@ -96,6 +96,6 @@ final class UtilisateurController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_personnage_catalogue', [], Response::HTTP_SEE_OTHER);
     }
 }

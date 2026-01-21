@@ -33,6 +33,28 @@ class UtilisateurRepository extends ServiceEntityRepository implements PasswordU
         $this->getEntityManager()->flush();
     }
 
+    public function findAllForAdmin(): array
+       {
+           return $this->createQueryBuilder('u')
+               ->where('u INSTANCE OF App\Entity\Moderateur OR u INSTANCE OF App\Entity\Utilisateur')
+               ->orderBy('u.id', 'ASC')
+               ->getQuery()
+               ->getResult()
+           ;
+       }
+
+    public function findAllForMods(): array
+       {
+           return $this->createQueryBuilder('u')
+               ->where('u INSTANCE OF App\Entity\Utilisateur')
+               ->orderBy('u.id', 'ASC')
+               ->getQuery()
+               ->getResult()
+           ;
+       }
+
+
+    
     //    /**
     //     * @return Utilisateur[] Returns an array of Utilisateur objects
     //     */
