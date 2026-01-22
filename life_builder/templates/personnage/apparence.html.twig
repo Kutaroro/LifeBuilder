@@ -124,42 +124,4 @@
 
     </main>
 
-<script>
-        function toggleForm(formId,isAnswer=false) {
-            const form = document.getElementById(formId);
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
-        }
-
-
-    document.addEventListener('click', function(event) {
-        // 1. On cherche si on a cliqué sur un bouton dropdown
-        const btn = event.target.closest('.dropdown-button');
-        const container = event.target.closest('.dropdown-container');
-
-        // Si on clique sur un bouton, on bascule son menu
-        if (btn && container) {
-            const menu = container.querySelector('.dropdown-menu');
-            
-            // On ferme les autres menus ouverts avant d'ouvrir celui-ci
-            document.querySelectorAll('.dropdown-menu').forEach(m => {
-                if (m !== menu) m.classList.add('hidden');
-            });
-
-            menu.classList.toggle('hidden');
-            event.stopPropagation(); // Empêche la fermeture immédiate
-        } 
-        // 2. Si on clique n'importe où ailleurs, on ferme tous les menus
-        else {
-            document.querySelectorAll('.dropdown-menu').forEach(m => {
-                m.classList.add('hidden');
-            });
-        }
-    });
-
-</script>
-
 {% endblock %}

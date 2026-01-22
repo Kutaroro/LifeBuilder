@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Apparence;
 use App\Entity\Commentaire;
 use App\Entity\Personnage;
 use App\Entity\Histoire;
@@ -36,7 +37,7 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
-    #[Route(name: 'app_personnage_catalogue', methods: ['GET'])]
+    #[Route('/catalogue', name: 'app_personnage_catalogue', methods: ['GET'])]
     public function catalogue(PersonnageRepository $personnageRepository): Response
     {   
         $personnages = $personnageRepository->findAll();
@@ -105,14 +106,13 @@ final class PersonnageController extends AbstractController
             $histoires = $entityManager->getRepository(Histoire::class)->findBy([
                 'personnage' => $personnage,
                 'categorie' => $category
-            ]);
+            ], ['id' => 'DESC'], 4, 0);
         } else {
-            $histoires = $personnage->getHistoires()->toArray();
+            $histoires = $entityManager->getRepository(Histoire::class)->findBy(['personnage' => $personnage,], ['id' => 'DESC'], 4, 0);
         }
-      
-        
 
-        $apparences = $personnage->getApparences()->toArray();
+        $apparences = $entityManager->getRepository(Apparence::class)->findBy(['personnage' => $personnage,], ['id' => 'DESC'], 4, 0);
+
 
         $commentaires= $personnage->getCommentaires()->toArray();
 
@@ -314,10 +314,6 @@ final class PersonnageController extends AbstractController
         ]);
 
     }
-
-    
-
-
     //Permet de reorganiser la liste si l'utilisateur change l'ordre d'affichage 
     public function reorganisation(Personnage $personnage, HistoireRepository $histoireRepository, EntityManagerInterface $em): void
     {

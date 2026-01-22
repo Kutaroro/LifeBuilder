@@ -28,7 +28,42 @@ class SignalementRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
-    
+
+    public function findByOwner($value): array
+    {
+        return $this->createQueryBuilder('s')
+           
+            ->leftJoin('s.mod', 'm') 
+            ->andWhere('m.nom = :val')   
+            ->setParameter('val', $value)
+            ->orderBy('s.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+        
+    public function findByKeyword($value): array
+       {
+           return $this->createQueryBuilder('s')
+               ->leftJoin('s.utilisateur', 'u')
+               ->leftJoin('s.reportedBy', 'r')
+               ->leftJoin('s.personnage', 'p')
+               ->leftJoin('s.mod', 'm')
+               ->andWhere('LOWER(s.titre) LIKE LOWER(:val)
+                                  OR LOWER(s.description) LIKE LOWER(:val)
+                                  OR LOWER(s.type) LIKE LOWER(:val)
+                                  OR LOWER(s.status) LIKE LOWER(:val)
+                                  OR LOWER(u.nom) LIKE LOWER(:val)
+                                  OR LOWER(r.nom) LIKE LOWER(:val)
+                                  OR LOWER(p.nom) LIKE LOWER(:val)
+                                  OR LOWER(m.nom) LIKE LOWER(:val)
+                                 ')
+               ->setParameter('val', '%'.$value.'%')
+               ->orderBy('s.id', 'ASC')
+               ->getQuery()
+               ->getResult()
+           ;
+       }
+
     //    /**
     //     * @return Signalement[] Returns an array of Signalement objects
     //     */

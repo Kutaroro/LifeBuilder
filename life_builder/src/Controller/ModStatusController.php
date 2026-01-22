@@ -92,5 +92,6 @@ final class ModStatusController extends AbstractController
         return $this->redirectToRoute('app_utilisateur', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
     }
 
+    
 
 }

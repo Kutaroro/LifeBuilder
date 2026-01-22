@@ -78,7 +78,7 @@
                         </div>
                     {% endif %}
 
-                    {# 2. Colonne Contenu #}
+                    
                     <div class="flex-1 space-y-4 w-full">
                         <div class="flex justify-between items-start">
                             <h3 class="text-xl font-bold">{{ item.titre }}</h3>
@@ -89,7 +89,6 @@
                             {{ item.description }}
                         </p>
 
-                        {# 3. Miniatures (seulement si plus d'une image) #}
                         {% if item.images|length > 1 %}
                             <div class="flex flex-wrap gap-3 mt-4">
                                 {% for img in item.images|slice(1) %}
@@ -240,7 +239,15 @@
             <div class="flex-1">
                 <div class="{{ isReply ? 'bg-gray-50' : 'bg-white' }} p-4 rounded-2xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold text-gray-900">{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}</span>
+                        <a href={{path('app_utilisateur', {'id': comment.utilisateur.id})}}>  
+                            <span class="font-bold text-gray-900 hover:underline">{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}
+                            {% if 'ROLE_ADMIN' in comment.utilisateur.roles %}
+                                <span class="text-xs text-red-500"> - Admin</span>
+                            {% elseif 'ROLE_MODERATOR' in comment.utilisateur.roles %}
+                                <span class="text-xs text-yellow-500"> - Modérateur</span>
+                            {% endif %}
+                            </span>
+                         </a>
                         <span class="text-xs text-gray-400">{{ comment.date|date('d/m/Y H:i') }}</span>
                     </div>
                     

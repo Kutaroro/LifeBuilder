@@ -56,6 +56,9 @@
                         <span class="text-xl text-gray-400 font-medium">Administrateur</span>
                     {% elseif "ROLE_MODERATOR" in utilisateur.roles %}
                         <span class="text-xl text-gray-400 font-medium">Modérateur</span>
+                        {% if utilisateur.category %}
+                            <span class="text-xl text-gray-400 font-medium"> - {{ utilisateur.category }}</span>
+                        {% endif %}
                     {% else %}
                         <span class="text-xl text-gray-400 font-medium">Utilisateur</span>
                     {% endif %}
@@ -88,56 +91,71 @@
             </div>
         </section>
 
+        <section class="flex gap-8 flex-col">
+            <h1 class="text-3xl font-bold text-gray-900 ">Tous mes signalements en cours</h1>
 
-     
-        <section class="mb-8">
-            <div class="flex gap-6 pb-2 mb-6">
-                <h2 class="text-3xl font-bold text-black items-baseline border-b-2 border-black">Personnages récents</h2>
-                <a href="{{ path('app_personnage_index', {'id': utilisateur.id}) }}" class="mt-4 text-sm font-semibold text-gray-600 underline hover:text-black decoration-2 underline-offset-4">
-                    (voir tous les personnages)
-                </a>
-            </div>
-            
-            {% if app.user == utilisateur %}
-                <div>
-                    <a href="{{ path('app_personnage_new') }}" class="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-gray-300 text-gray-600 hover:border-black hover:text-black transition-colors bg-white">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        <span class="font-medium">Ajouter un personnage</span>
-                    </a>
-                </div>
-            {% endif %}
-        </section>
+            <div class="space-y-12">
+                {% for report in reports %}
+                    {% if report.status != 'Traité' %}
+                        <div class="flex items-start group">
 
-
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {% for personnage in utilisateur.personnages %}
-                <a href="{{ path('app_personnage_show', {'id': personnage.id}) }}">
-                    <div class="flex flex-row bg-white border-2 border-gray-100 rounded-xl overflow-hidden hover:border-black transition-colors duration-300 cursor-pointer h-48">
-                        {# Image Personnage #}
-                        <div class="w-1/3 bg-gray-100">
-                            {% if personnage.image %}
-                                <img src="{{ asset('uploads/personnages/' ~ personnage.image) }}" alt="{{ personnage.nom }}" class="w-full h-full object-cover">
-                            {% else %}
-                                <div class="w-full h-full flex items-center justify-center text-gray-300">
-                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        {# Infos Personnage #}
-                        <div class="w-2/3 p-6 flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ personnage.nom }}</h3>
-                                </div>
-                                <p class="text-gray-600 line-clamp-3 leading-snug">
-                                    {{ personnage.description }}
+                            <div class="flex-1 space-y-1">
+                                <a href="{{ path('app_admin_show', {'id': report.id}) }}" class="hover:underline">
+                                    <h3 class="text-xl font-bold text-gray-900">
+                                        {{ report.titre }}
+                                        <span class="font-normal text-gray-500 ml-2">({{ report.date|date('d/m/Y') }})</span>
+                                    </h3>
+                                </a>
+                                <h2 class="font-bold text-gray-500">Catégorie {{report.type}}</h2>
+                                
+                                <p class="text-lg text-gray-900">
+                                    Utilisateur signalé <span class="font-bold">“{{ report.utilisateur.nom }}”</span> 
+                                    {% if report.personnage %} (Personnage : “{{ report.personnage.nom }}”) {% endif %}
+                                    - Signalé par <span class="font-bold">“{{ report.reportedBy.nom }}”</span>
+                                </p>
+                                
+                                <p class="text-gray-500 leading-relaxed max-w-3xl">
+                                    {{ report.description }}
                                 </p>
                             </div>
+
+                            <div class="ml-8 flex flex-col items-end justify-center self-center min-w-[200px]">
+                                {% if report.status == 'En cours de traitement' %}
+                                    <p class="text-gray-600 text-lg text-right leading-tight">
+                                        En cours de traitement par<br>
+                                        <span class="font-bold">“{{ report.mod.nom }}”</span>
+                                    </p>
+                                    
+                                    {# Bouton pour clôturer quand on a fini #}
+                                    <form action="{{ path('app_signalement_close', {'id': report.id}) }}" method="post" class="mt-4">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('close' ~ report.id) }}">
+                                        <button type="submit" class="text-sm font-bold text-green-600 hover:underline">Marquer comme traité</button>
+                                    </form>
+
+                                {% elseif report.status == 'En attente' or report.status == 'Non Traité' %}
+                                    <div class="flex flex-col items-end gap-3">
+                                        <span class="px-6 py-2 rounded-xl border-2 border-gray-300 text-xl font-medium text-gray-700 bg-white">
+                                            Non Traité
+                                        </span>
+                                        
+                                        <form action="{{ path('app_signalement_take', {'id':report.id}) }}" method="post">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('take' ~ report.id) }}">
+                                            <button type="submit" class="text-sm font-bold text-indigo-600 hover:underline">Prendre le ticket</button>
+                                        </form>
+                                    </div>
+                                {# {% else %}
+                                    <span class="text-gray-400 italic">{{ report.status }}</span> #}
+                                {% endif %}
+                            </div>
                         </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-20">
+                        <p class="text-gray-400 text-lg italic">Aucun signalement à afficher pour le moment.</p>
                     </div>
-                </a>
-            {% endfor %}
+                {% endfor %}
+            </div>
+
         </section>
 
     </div>

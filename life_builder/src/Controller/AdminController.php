@@ -3,13 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Moderateur;
+use App\Entity\ModStatus;
 use App\Entity\Signalement;
 use App\Entity\Utilisateur;
+use App\Form\RegistrationFormType;
 use App\Repository\SignalementRepository;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Monolog\Handler\Curl\Util;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +25,7 @@ final class AdminController extends AbstractController
 {
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_MODERATOR")'))]
     #[Route('/admin', name: 'app_admin')]
-    public function index(SignalementRepository $signalementRepository): Response
+    public function index(SignalementRepository $signalementRepository, Request $request): Response
     {
 
         $user = $this->getUser();
@@ -35,6 +40,12 @@ final class AdminController extends AbstractController
             $reports = $signalementRepository->findByType($categorie, 'Traité');
         }
 
+        $query = $request->query->get('search');
+
+        if ($query) {
+            $reports = $signalementRepository->findByKeyword($query);
+        }
+
         return $this->render('admin/index.html.twig', [
             'reports' => $reports,
         ]);
@@ -44,7 +55,7 @@ final class AdminController extends AbstractController
     #[IsGranted(new Expression(
     'is_granted("ROLE_ADMIN") or (is_granted("ROLE_MODERATOR") and user.getCategory() == "Utilisateur")'))]
     #[Route('/admin/utilisateurs', name: 'app_admin_utilisateurs')]
-    public function utilisateurs(UtilisateurRepository $utilisateurRepository): Response
+    public function utilisateurs(UtilisateurRepository $utilisateurRepository, Request $request): Response
     {
 
         $user = $this->getUser();
@@ -55,9 +66,17 @@ final class AdminController extends AbstractController
             $users = $utilisateurRepository->findAllForMods();
         }
 
+        $query = $request->query->get('search');
+
+        if ($query) {
+            $users = $utilisateurRepository->findByKeyword($query);
+        }
+
+
         return $this->render('admin/users.html.twig', [
             'users' => $users,
         ]);
+
     }
 
     #[Route('/admin/signlement/{id}', name: 'app_admin_show')]
@@ -69,48 +88,69 @@ final class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/admin/profil/{id}', name: 'app_admin_profil')]
+    public function profil(Utilisateur $utilisateur, SignalementRepository $signalementRepository): Response
+    {   
+        $reports = $signalementRepository->findByOwner($utilisateur->getNom());
+        return $this->render('admin/profil.html.twig', [
+            'utilisateur' => $utilisateur,
+            'reports' => $reports,
+        ]);
+    }
 
-    #[Route('/admin/create', name: 'app_admin_create')]
-    public function createAdmin(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    #[Route('{id}/Categorie/edit', name: 'app_edit_categorie', methods: ['POST'])]
+    public function editCategorie(Request $request, EntityManagerInterface $em, Utilisateur $utilisateur): Response
     {
-        $admin = new Utilisateur();
-        $admin->setEmail('admin@test.com');
-        $admin->setRoles(['ROLE_ADMIN']); // C'est ici que la magie opère
-        // On encode le mot de passe via UserPasswordHasherInterface
-        $hashedPassword = $passwordHasher->hashPassword($admin, 'admin@test.com');
-        $admin->setPassword($hashedPassword);
-        $admin->setNom(ByteString::fromRandom(8)->toString());
-        $admin->setCreatedAt(new \DateTimeImmutable());
-        $admin->setModifiedAt(new \DateTimeImmutable());   
 
-        $entityManager->persist($admin);
-        $entityManager->flush();
+        $newCategorie = $request->request->get('categorie');
+        if (!($utilisateur instanceof Moderateur)) {
+            $this->addFlash('error', 'L\'utilisateur n\'est pas un modérateur.');
+            return $this->redirectToRoute('app_admin_utilisateurs');
+        }
+        if (in_array($newCategorie, ['Utilisateur', 'Personnage'])) {
+            $utilisateur->setCategory($newCategorie);
+            $em->persist($utilisateur);
+            $em->flush();
+            $this->addFlash('success', 'Catégorie mis à jour avec succès.');
+        } else {
+            $this->addFlash('error', 'Catégorie invalide.');
+        }   
+
+        return $this->redirectToRoute('app_admin_utilisateurs');
+    }
 
 
+    #[Route('/mod/create', name: 'app_create_mod')]
+    public function createAdmin(Request $request, Security $security ,EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
+    {
         $modoP = new Moderateur();
-        $modoP->setEmail('modoP@test.com');
-        $modoP->setRoles(['ROLE_MODERATOR']); 
-        $modoP->setCategory('Personnage');   
-        $modoP->setPassword($passwordHasher->hashPassword($modoP, 'modoP@test.com'));
-        $modoP->setNom(ByteString::fromRandom(8)->toString());
-        $modoP->setCreatedAt(new \DateTimeImmutable());
-        $modoP->setModifiedAt(new \DateTimeImmutable());   
-        $entityManager->persist($modoP);
-        $entityManager->flush();
+        
+        $form = $this->createForm(RegistrationFormType::class, $modoP);
+        $form->handleRequest($request);
 
-        $modoU = new Moderateur();
-        $modoU->setEmail('modoU@test.com');
-        $modoU->setRoles(['ROLE_MODERATOR']); // On lui donne son rôle
-        $modoU->setCategory('Utilisateur');     // On remplit le champ spécifique à l'enfant
-        $modoU->setPassword($passwordHasher->hashPassword($modoU, 'modoU@test.com'));
-        $modoU->setNom(ByteString::fromRandom(8)->toString());
-        $modoU->setCreatedAt(new \DateTimeImmutable());
-        $modoU->setModifiedAt(new \DateTimeImmutable());   
-        $entityManager->persist($modoU);
-        $entityManager->flush();
-         
-        return new Response('Admins et modérateurs créés avec succès !');
-      
+        if ($form->isSubmitted() && $form->isValid()) {
+           
+            $plainPassword = $form->get('plainPassword')->getData();
+
+            $status= new ModStatus();
+            $status->setStatus('Pas de sanction en cours');
+            $status->setNbSig(0);
+            $modoP->setPassword($userPasswordHasher->hashPassword($modoP, $plainPassword));
+            $modoP->setNom(ByteString::fromRandom(8)->toString());           
+            $modoP->setCreatedAt(new \DateTimeImmutable());
+            $modoP->setModifiedAt(new \DateTimeImmutable());               
+            $modoP->setRoles(['ROLE_MODERATOR']); 
+            $modoP->setStatus($status);
+            $entityManager->persist($modoP);
+            $entityManager->flush();
+
+            // do anything else you need here, like send an email
+            return $this->redirectToRoute('app_admin_utilisateurs');
+        }
+
+        return $this->render('admin/register.html.twig', [
+            'registrationForm' => $form,
+        ]);
 
     }
 }

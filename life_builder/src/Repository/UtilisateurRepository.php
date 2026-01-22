@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -52,6 +53,22 @@ class UtilisateurRepository extends ServiceEntityRepository implements PasswordU
                ->getResult()
            ;
        }
+
+    public function findByKeyword(string $value): array
+    {
+        return $this->createQueryBuilder('u')
+            ->leftJoin('u.status', 's')
+            ->where('LOWER(u.nom) LIKE LOWER(:val) 
+                                OR LOWER(u.email) LIKE LOWER(:val)
+                                OR LOWER(s.status) LIKE LOWER(:val)
+                                OR LOWER(s.type) LIKE LOWER(:val)
+                                ')
+            ->setParameter('val', '%' . $value . '%')
+            ->orderBy('u.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
 
     

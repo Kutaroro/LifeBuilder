@@ -16,6 +16,24 @@ class PersonnageRepository extends ServiceEntityRepository
         parent::__construct($registry, Personnage::class);
     }
 
+    // src/Repository/PersonnageRepository.php
+
+public function findTopPopulaires(int $limit ): array
+{
+    return $this->createQueryBuilder('p')
+        // On joint les commentaires (remplace 'commentaires' par le nom de ta propriété dans l'entité Personnage)
+        ->leftJoin('p.commentaires', 'c')
+        // On sélectionne le personnage et on compte les commentaires
+        ->addSelect('COUNT(c) AS HIDDEN count_comments')
+        ->groupBy('p.id')
+        // On trie par le nombre de commentaires décroissant
+        ->orderBy('count_comments', 'DESC')
+        ->setMaxResults($limit)
+        ->getQuery()
+        ->getResult();
+}
+
+
 //    /**
 //     * @return Personnage[] Returns an array of Personnage objects
 //     */

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ModStatusRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ModStatusRepository::class)]
@@ -30,6 +31,9 @@ class ModStatus
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $dateFin = null;
 
     public function getId(): ?int
     {
@@ -92,6 +96,18 @@ class ModStatus
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getDateFin(): ?\DateTimeImmutable
+    {
+        return $this->dateFin;
+    }
+
+    public function setDateFin(?\DateTimeImmutable $dateFin): static
+    {
+        $this->dateFin = $dateFin;
 
         return $this;
     }

@@ -13,6 +13,47 @@
             {% block importmap %}{{ importmap('app') }}
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
             <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+            <script>
+                // Cette fonction doit être globale pour être appelée par les attributs onclick=""
+                function toggleForm(formId) {
+                    const form = document.getElementById(formId);
+                    if (form) {
+                        form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+                    }
+                }
+
+                // On initialise les écouteurs d'événements à chaque chargement de page Turbo
+                document.addEventListener('turbo:load', () => {
+                    
+                    // On nettoie d'abord les anciens écouteurs pour éviter les doublons (le fameux bug du double-clic)
+                    document.removeEventListener('click', handleDropdowns);
+                    document.addEventListener('click', handleDropdowns);
+                });
+
+                // On sépare la logique du dropdown pour plus de clarté
+                function handleDropdowns(event) {
+                    const btn = event.target.closest('.dropdown-button');
+                    const container = event.target.closest('.dropdown-container');
+
+                    if (btn && container) {
+                        const menu = container.querySelector('.dropdown-menu');
+                        
+                        // Fermer les autres menus
+                        document.querySelectorAll('.dropdown-menu').forEach(m => {
+                            if (m !== menu) m.classList.add('hidden');
+                        });
+
+                        menu.classList.toggle('hidden');
+                        event.stopPropagation();
+                    } else {
+                        // Clic en dehors : on ferme tout
+                        document.querySelectorAll('.dropdown-menu').forEach(m => {
+                            m.classList.add('hidden');
+                        });
+                    }
+                }
+            </script>
         {% endblock %}
         {% endblock %}
         <script src="https://cdn.tailwindcss.com"></script>

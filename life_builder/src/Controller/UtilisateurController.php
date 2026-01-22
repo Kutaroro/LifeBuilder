@@ -32,10 +32,11 @@ final class UtilisateurController extends AbstractController
         
         $currentUser = $this->getUser();
 
-       // Si on veux modifier un profil qui n'est pas le sien et qu'on est pas admin, accès refusé
-        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+       // Si on veux modifier un profil qui n'est pas le sien et qu'on est pas admin ou mod user, accès refusé
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_MODERATOR')) {
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce profil.");
-        }
+        }    
+        
     
     
         $form = $this->createForm(UtilisateurType::class, $utilisateur);
@@ -66,8 +67,10 @@ final class UtilisateurController extends AbstractController
             }
             $utilisateur->setModifiedAt(new \DateTimeImmutable());
             $entityManager->flush();
-            
-            $this->addFlash('success', 'Profil mis à jour !');
+
+            if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_MODERATOR')) {
+                return $this->redirectToRoute('app_admin_profil', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
+            }
             return $this->redirectToRoute('app_utilisateur', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
         }
         

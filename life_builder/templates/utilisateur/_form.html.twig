@@ -1,4 +1,64 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+<main class="grid grid-cols-2 gap-24 items-center justify-center ">
+    <section>
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Nom utilisateur</label>
+            {{ form_widget(form.nom, {'attr': {
+                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition',
+                'placeholder': 'Un nom'
+            }}) }}
+        </div>
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Email address</label>
+            {{ form_widget(form.email, {'attr': {
+                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition',
+                'placeholder': 'email@janesfakedomain.net'
+            }}) }}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Mdp</label>
+                {{ form_widget(form.password.first, {'attr': {
+                    'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition',
+                    'placeholder': '************'
+                }}) }}
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Mdp *</label>
+                {{ form_widget(form.password.second, {'attr': {
+                    'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition'
+                }}) }}
+            </div>
+        </div>
+    
+
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Your message (Description)</label>
+            {{ form_widget(form.description, {'attr': {
+                'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition min-h-[150px]',
+                'placeholder': 'Enter your question or message'
+            }}) }}
+        </div>
+
+        <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-gray-800 transition shadow-lg mt-8">
+            {{ button_label|default('Submit') }}
+        </button>
+    </section>
+    <section class="flex flex-col items-center gap-8">
+            <h1 class="font-bold  text-xl">Modifier l'avatar</h1>
+            <div class="relative group cursor-pointer" onclick="document.getElementById('{{ form.image.vars.id }}').click()">
+                <img id="preview-image" 
+                     src="{{ utilisateur.image ? asset('uploads/users/' ~ utilisateur.image) : asset('images/default-avatar.png') }}" 
+                     alt="Avatar" 
+                     class="w-80 h-80 rounded-full object-cover shadow-xl bg-gray-100 border-4 border-white group-hover:opacity-80 transition">
+            </div>
+            
+            <div class="hidden">
+                {{ form_widget(form.image) }}
+            </div>
+    </section>
+</main>
 {{ form_end(form) }}
+

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\ModStatus;
 use App\Entity\Utilisateur;
 use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,11 +28,14 @@ class RegistrationController extends AbstractController
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
+            $status= new ModStatus();
+            $status->setStatus('Pas de sanction en cours');
+            $status->setNbSig(0);
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $user->setNom(ByteString::fromRandom(8)->toString());
             $user->setCreatedAt(new \DateTimeImmutable());
             $user->setModifiedAt(new \DateTimeImmutable());
+            $user->setStatus($status);
             $entityManager->persist($user);
             $entityManager->flush();
 

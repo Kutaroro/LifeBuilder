@@ -1,16 +1,22 @@
-<header class="bg-white shadow">
-    <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-        <a href="{{ path('app_personnage_catalogue') }}" class="text-3xl font-bold text-gray-800">Life Builder</a>
+<header class="bg-black shadow">
+    <div class="container mx-auto px-8 py-10 flex justify-between items-center">
+        <a href="{{ path('app_home') }}" class="text-3xl font-bold text-white">Life Builder</a>
         <nav>
             <ul class="flex space-x-4">
-                <li><a href="{{ path('app_personnage_catalogue') }}" class="text-gray-600 hover:text-gray-800">Tous les personnages </a></li>
+                <li><a href="{{ path('app_personnage_catalogue') }}" class="text-white hover:text-blue-500">Tous les personnages </a></li>
                 {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_MODERATOR') %}
-                    <li><a href="{{ path('app_admin') }}" class="text-gray-600 hover:text-gray-800">Panneau d'administration</a></li>
+                    <li><a href="{{ path('app_admin') }}" class="text-white hover:text-blue-500">Panneau d'administration</a></li>
                 {% endif %}
                 {% if app.user %}
-                    <li><a href="{{ path('app_personnage_index', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mes personnages</a></li>
-                    <li><a href="{{ path('app_utilisateur', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mon profil</a></li>
-                    <li><a href="{{ path('app_logout') }}" class=" font-bold text-white bg-black border rounded-xl p-2 hover:bg-blue-500 transition-colors duration-200">Logout</a></li>
+                    {% if  is_granted('ROLE_ADMIN') or is_granted('ROLE_MODERATOR') %}
+                        <li><a href="{{ path('app_admin_profil', {'id': app.user.id}) }}" class="text-white hover:text-blue-500">Mon profil</a></li>
+                    {% else %}
+                        <li><a href="{{ path('app_personnage_index', {'id': app.user.id}) }}" class="text-white hover:text-blue-500">Mes personnages</a></li>
+                        <li><a href="{{ path('app_utilisateur', {'id': app.user.id}) }}" class="text-white hover:text-blue-500">Mon profil</a></li>
+                    {% endif %}
+                <li> <p  class="text-white hover:text-blue-500"> Messagerie (coming soon) ;) </p> </li>
+
+                    <li><a href="{{ path('app_logout') }}" class=" font-bold bg-white border rounded-xl p-2 hover:bg-blue-500 transition-colors duration-200">Logout</a></li>
                 {% else %}
                     <li><a href="{{ path('app_login') }}" class="font-bold text-white bg-blue-500 border rounded-xl p-2 hover:bg-black transition-colors duration-200">Login</a></li>
                 {% endif %}

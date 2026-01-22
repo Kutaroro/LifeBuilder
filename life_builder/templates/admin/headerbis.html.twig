@@ -1,4 +1,13 @@
-<div class="grid grid-cols-2 flex justify-center items-center  bg-[url(https://gaming-cdn.com/images/products/2616/orig/the-legend-of-zelda-breath-of-the-wild-switch-jeu-nintendo-eshop-europe-cover.jpg?v=1730381682)] ">
+<div class="grid 
+        {% if is_granted("ROLE_ADMIN") %}
+             grid-cols-3
+        {% else %}
+             grid-cols-2
+        {% endif %}
+         flex justify-center items-center  bg-[url(https://gaming-cdn.com/images/products/2616/orig/the-legend-of-zelda-breath-of-the-wild-switch-jeu-nintendo-eshop-europe-cover.jpg?v=1730381682)] ">
             <a href="{{ path('app_admin') }}" class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Signalements</a>            
             <a href="{{ path('app_admin_utilisateurs') }}" class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Utilisateurs</a>
+            {% if is_granted("ROLE_ADMIN") %}
+                <a href="{{ path('app_create_mod') }}" class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Créer un modérateur</a>
+            {% endif %}
 </div>

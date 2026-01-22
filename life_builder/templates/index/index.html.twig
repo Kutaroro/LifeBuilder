@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - LifeBuilder{% endblock %}
+
+{% block body %}
+<main class="bg-white">
+
+    {# SECTION HERO (Bannière) #}
+    <section class="relative h-[400px] flex items-center px-16 bg-gray-900 overflow-hidden">
+        {# Image de fond avec overlay sombre #}
+        <div class="absolute inset-0 z-0">
+            <img src="{{ asset('/assets/Banniere.png') }}" class="w-full h-full object-cover opacity-50" alt="Bannière">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+        </div>
+        
+        <div class="relative z-10 max-w-2xl">
+            <h1 class="text-6xl font-bold text-white mb-6">LifeBuilder</h1>
+            <p class="text-xl text-gray-200 leading-relaxed">
+                Donnez vie à vos personnages.<br/> 
+                Qu’il soit le héros, un roi-démon ou un simple marchand. <br/> 
+                Chaque personnage a sa place sur LifeBuilder.
+            </p>
+        </div>
+    </section>
+
+    {# SECTION ARGUMENTS (Les 3 colonnes) #}
+    <section class="py-20 px-8 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-12">Vous cherchez quoi faire? </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {# Colonne 1 #}
+            <div class="flex flex-col">
+                <img src="{{ asset('/assets/Adriel.png') }}" alt="Créer" class="w-full aspect-[4/5] object-cover rounded-xl mb-6 shadow-sm"/>
+                <h3 class="text-xl font-bold mb-3">Créer</h3>
+                <p class="text-gray-500 leading-relaxed">Commencez par des informations simples : nom, prénom ou même un simple pseudonyme.</p>
+            </div>
+
+            {# Colonne 2 #}
+            <div class="flex flex-col">
+                <img src="{{ asset('/assets/Dain.png') }}" alt="Donner vie" class="w-full aspect-[4/5] object-cover rounded-xl mb-6 shadow-sm"/>
+                <h3 class="text-xl font-bold mb-3">Donner vie</h3>
+                <p class="text-gray-500 leading-relaxed">Une histoire complète, de simples anecdotes ou des petites idées ? Vous pouvez donner vie à vos personnages à travers de petites anecdotes ou une trilogie complète.</p>
+            </div>
+
+            {# Colonne 3 #}
+            <div class="flex flex-col">
+                <img src="{{ asset('/assets/Dainsleif.png') }}" alt="Partager" class="w-full aspect-[4/5] object-cover rounded-xl mb-6 shadow-sm"/>
+                <h3 class="text-xl font-bold mb-3">Partager</h3>
+                <p class="text-gray-500 leading-relaxed">Vos personnages se sentent seuls ? Partagez vos personnages et interagissez avec ceux des autres utilisateurs pour peut-être leur trouver des compagnons de route.</p>
+            </div>
+        </div>
+    </section>
+
+    {# SECTION PERSONNAGES POPULAIRES (Slider) #}
+    <section class="py-12 bg-gray-50">
+        <h2 class="text-4xl font-bold text-center mb-12">Personnages populaires</h2>
+        
+        <div class="relative max-w-5xl mx-auto px-12"> 
+            <div class="swiper swiper-perso overflow-hidden rounded-2xl shadow-2xl"> 
+                <div class="swiper-wrapper">
+                    {% for item in persosPop %}
+                        <div class="swiper-slide relative aspect-video bg-gray-200">
+                            {% if item.image %}
+                                <img src="{{ asset('uploads/personnages/' ~ item.image) }}" class="w-full h-full object-cover">
+                            {% endif %}
+                            <div class="absolute bottom-0 w-full bg-black/40 backdrop-blur-sm py-4 text-center">
+                                <a href="{{ path('app_personnage_show', {'id': item.id}) }}"> <span class="text-white text-xl hover:underline">{{ item.nom }}</span></a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {# Navigation Swiper personnalisée façon image #}
+            <div class="swiper-button-prev !text-black after:!text-xl bg-white w-12 h-12 rounded-full shadow-lg !-left-4"></div>
+            <div class="swiper-button-next !text-black after:!text-xl bg-white w-12 h-12 rounded-full shadow-lg !-right-4"></div>
+        </div>
+    </section>
+
+    {# SECTION LES PETITS NOUVEAUX (Liste) #}
+    <section class="py-20 max-w-3xl mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-16">Les petits nouveaux</h2>
+        
+        <div class="space-y-12">
+            {% for item in persosRecents %}
+                <div class="flex items-start gap-8">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold">{{ item.nom }}</h3>
+                        <p class="text-gray-500 mt-2 leading-relaxed">
+                            {{ item.description|length > 150 ? item.description|slice(0, 150) ~ '...' : item.description }}
+                        </p>
+                    </div>
+                    <div class="w-32 h-32 flex-shrink-0 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
+                        {% if item.image %}
+                            <img src="{{ asset('uploads/personnages/' ~ item.image) }}" class="w-full h-full object-cover">
+                        {% else %}
+                             <div class="w-full h-full flex items-center justify-center">
+                                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                             </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# BOUTON FINAL #}
+        <div class="text-center mt-20">
+            {% set targetPath = app.user ? path('app_personnage_new') : path('app_register') %}
+            <a href="{{ targetPath }}" class="inline-block bg-[#333] hover:bg-black text-white text-xl px-12 py-4 rounded-xl transition-all transform hover:scale-105 shadow-xl">
+                On commence ?
+            </a>
+        </div>
+    </section>
+
+</main>
+
+
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const swiperPerso = new Swiper(".swiper-perso", {
+            slidesPerView: 1, // 1 perso sur mobile
+            spaceBetween: 20,
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+        });
+    });
+</script>
+{% endblock %}

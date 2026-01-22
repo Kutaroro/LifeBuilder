@@ -14,7 +14,7 @@ class ModStatusType extends AbstractType
         $builder
             ->add('status')
             ->add('type')
-            ->add('duree')
+            ->add('dateFin')
             ->add('description')
         ;
     }

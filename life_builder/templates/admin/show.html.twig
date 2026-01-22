@@ -50,7 +50,7 @@
                     </div>
                     <div>
                         <p class="font-bold text-gray-900">Personnage : {{ signalement.personnage.nom }}</p>
-                        <p class="text-sm text-gray-500 text-purple-600 underline cursor-pointer">Voir la fiche du personnage</p>
+                        <a href="{{ path('app_personnage_show', {'id': signalement.personnage.id}) }}" class="text-sm text-gray-500 text-purple-600 underline cursor-pointer">Voir la fiche du personnage</a>
                     </div>
                 </div>
             </section>
@@ -66,6 +66,7 @@
                     </a>
                     <p class="text-xs text-gray-500">{{ signalement.utilisateur.email }}</p>
                     <p class=" text-gray-500"> Nombre de signalements en ce moment: <b> {{ signalement.utilisateur.signalements|length }}</b></p>
+                    <p class=" text-gray-500"> Nombre de signalements total: <b> {{ signalement.utilisateur.status.nbSig }}</b></p>
                 </div>
                 
                 <hr class="border-gray-200">
