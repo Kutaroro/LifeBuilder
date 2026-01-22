@@ -6,6 +6,7 @@
 
 {{ include("personnage/headerbis.html.twig") }}
 
+
 <div class="max-w-5xl mx-auto px-4 py-10 space-y-16 text-gray-800">
 
     <section class="flex flex-col md:flex-row gap-10">
@@ -44,14 +45,25 @@
                     {% endif %}
                     
                 </div>
-                <p class="text-gray-400 mt-2 font-medium">(Placeholder Cat)</p>
-            </div>
 
-            <div class="flex gap-2">
-                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold">Tags</span>
-                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold">Test</span>
-            </div>
+                {# Section Catégories #}
+                <div class="flex flex-wrap gap-2 mt-4">
+                    {% for cat in personnage.categories %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-md bg-gray-900 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                            {{ cat }}
+                        </span>
+                    {% endfor %}
+                </div>
 
+                {# Section Tags #}
+                <div class="flex flex-wrap gap-2 mt-3">
+                    {% for tag in personnage.tags %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:border-gray-400 hover:text-black transition-colors duration-200">
+                            <span class="text-gray-400 mr-1">#</span>{{ tag }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
             <div class="prose prose-blue text-gray-600 leading-relaxed">
                 {{ personnage.description|nl2br }}
             </div>
@@ -141,44 +153,44 @@
 
     <section class="space-y-4">
         <h2 class="text-2xl font-bold">Personnages liés</h2>
-
-        <div class="relative px-12"> 
             
-            <div class="swiper swiper-perso overflow-hidden"> 
-                <div class="swiper-wrapper">
-                    {% for item in personnage.persoLies %}
-                        <div class="swiper-slide">
-                            <div class="space-y-3">
-                                <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="group block">
-                                    {% if item.image %}
-                                        <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                                            <img src="{{ asset('uploads/personnages/' ~ item.image) }}" 
-                                                class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <div class="relative px-12"> 
+                {# 'swiper' est obligatoire pour le CSS, 'js-swiper-personnage' est pour ton JS #}
+                <div class="swiper js-swiper-personnage overflow-hidden"> 
+                    <div class="swiper-wrapper"> {# 'swiper-wrapper' est obligatoire #}
+                        {% for item in personnage.persoLies %}
+                            <div class="swiper-slide"> {# 'swiper-slide' est obligatoire #}
+                                <div class="space-y-3">
+                                    <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="group block">
+                                        {% if item.image %}
+                                            <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                                <img src="{{ asset('uploads/personnages/' ~ item.image) }}" 
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                            </div>
+                                        {% else %}
+                                            <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50">
+                                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            </div>
+                                        {% endif %}
+                                    </a>
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-bold text-lg">{{ item.nom }}</h4>
+                                            <p class="text-xs text-gray-400 italic">Personnage lié</p>
                                         </div>
-                                    {% else %}
-                                        <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50">
-                                            <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        </div>
-                                    {% endif %}
-                                </a>
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h4 class="font-bold text-lg">{{ item.nom }}</h4>
-                                        <p class="text-xs text-gray-400 italic">Ami d'enfance</p>
                                     </div>
-                                    <button class="text-gray-400">•••</button>
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
 
-            <div class="swiper-button-prev !left-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
-            <div class="swiper-button-next !right-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
-            
-            <div class="swiper-pagination !-bottom-8"></div>
-        </div>
+                {# On peut renommer les boutons pour le JS, mais on garde les classes Swiper pour le look #}
+                <div class="swiper-button-prev js-perso-prev !left-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
+                <div class="swiper-button-next js-perso-next !right-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
+                
+                <div class="swiper-pagination js-perso-pagination !-bottom-8"></div>
+            </div>
     </section>
 
     
@@ -197,21 +209,17 @@
         
         {% for commentaire in commentaires %}
             {% if commentaire.commentaire is null %}
-                {# Niveau 1 : Le commentaire parent #}
-                <div class="grid grid-cols-12 gap-4">
+                {# Niveau 1 : Le commentaire parent à GAUCHE #}
+                <div class="grid grid-cols-12 gap-4 border-b border-gray-50 pb-8">
                     <div class="col-span-11 md:col-span-8">
-                        {{ macros.display_comment(commentaire, formR, false,personnage) }}
+                        {{ macros.display_comment(commentaire, formR, false, personnage) }}
                     </div>
                     
-                    {# Niveau 2 : Conteneur pour TOUTES les réponses de ce parent #}
+                    {# Niveau 2+ : TOUTES les réponses à DROITE (empilées) #}
                     <div class="col-span-11 col-start-2 md:col-span-8 md:col-start-5 space-y-4 mt-4">
                         {% for rep in commentaire.reponses %}
-                            {{ macros.display_comment(rep, formR, true,personnage) }}
-                            {# Si tu veux gérer les réponses de réponses au même niveau, 
-                               on peut boucler récursivement ici ou aplatir la liste #}
-                            {% for sub_rep in rep.reponses %}
-                                {{ macros.display_comment(sub_rep, formR, true,personnage) }}
-                            {% endfor %}
+                            {# On appelle la macro qui va déballer TOUTE l'arborescence ici #}
+                            {{ macros.display_recursive_flat(rep, formR, personnage) }}
                         {% endfor %}
                     </div>
                 </div>
@@ -220,124 +228,178 @@
             <p class="text-gray-500 italic text-center">Aucun commentaire pour le moment.</p>
         {% endfor %}
     </div>
-</div>
 
-{# --- Macro adaptée --- #}
-{% macro display_comment(comment, formR, isReply, personnage) %}
-    <div id="comment-{{ comment.id }}" class="relative group">
-        <div class="flex items-start gap-3 {{ isReply ? 'flex-row-reverse text-right' : '' }}">
-            
-            {# Avatar (Placeholder basé sur ton image) #}
-            <div class="flex-shrink-0">
-                <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
-                    {% if comment.utilisateur and comment.utilisateur.image %}
-                        <img src="{{ asset('uploads/users/' ~ comment.utilisateur.image) }}" alt="Avatar" >
-                    {% endif %}
-                </div>
+    {% macro display_recursive_flat(comment, formR, personnage) %}
+        {% import _self as self %}
+
+        {# 1. On affiche la bulle du commentaire actuel (isReply = true) #}
+        {{ self.display_comment(comment, formR, true, personnage) }}
+
+        {# 2. Si ce commentaire a lui-même des réponses, on les affiche à la suite #}
+        {% if comment.reponses|length > 0 %}
+            {% for sub_rep in comment.reponses %}
+                {{ self.display_recursive_flat(sub_rep, formR, personnage) }}
+            {% endfor %}
+        {% endif %}
+    {% endmacro %}
+
+    {# --- MACRO 2 : La logique récursive pour "aplatir" les réponses à droite --- #}
+    {% macro recursive_responses(comment, formR, personnage) %}
+        {% import _self as self %}
+        
+        {# On affiche le commentaire actuel #}
+        {{ self.display_single_comment(comment, formR, true, personnage) }}
+
+        {# Si ce commentaire a des réponses, on les affiche juste en dessous (toujours dans la même colonne) #}
+        {% if comment.reponses|length > 0 %}
+            <div class="mt-4 space-y-4 border-l-2 border-blue-50 pl-4 ml-2">
+                {% for sub_rep in comment.reponses %}
+                    {{ self.recursive_responses(sub_rep, formR, personnage) }}
+                {% endfor %}
             </div>
+        {% endif %}
+    {% endmacro %}
 
-            <div class="flex-1">
-                <div class="{{ isReply ? 'bg-gray-50' : 'bg-white' }} p-4 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-1">
-                        <a href={{path('app_utilisateur', {'id': comment.utilisateur.id})}}>  
-                            <span class="font-bold text-gray-900 hover:underline">{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}
-                            {% if 'ROLE_ADMIN' in comment.utilisateur.roles %}
-                                <span class="text-xs text-red-500"> - Admin</span>
-                            {% elseif 'ROLE_MODERATOR' in comment.utilisateur.roles %}
-                                <span class="text-xs text-yellow-500"> - Modérateur</span>
-                            {% endif %}
-                            </span>
-                         </a>
-                        <span class="text-xs text-gray-400">{{ comment.date|date('d/m/Y H:i') }}</span>
-                    </div>
-                    
-                    <p class="text-gray-800 text-sm">
-                        {% if comment.mentionedUtilisateur %}
-                            <span class="text-blue-500 font-medium">@{{ comment.mentionedUtilisateur.nom }}</span>
+    {% macro display_comment(comment, formR, isReply, personnage) %}
+        <div id="comment-{{ comment.id }}" class="relative group">
+            <div class="flex items-start gap-3 {{ isReply ? 'flex-row-reverse text-right' : '' }}">
+                
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
+                        {% if comment.utilisateur and comment.utilisateur.image %}
+                            <img src="{{ asset('uploads/users/' ~ comment.utilisateur.image) }}" alt="Avatar" class="w-full h-full object-cover">
                         {% endif %}
-                        {{ comment.description }}
-                    </p>
+                    </div>
                 </div>
 
-                {# Actions (Répondre / Supprimer) #}
-                <div class="flex gap-4 mt-1 px-2 {{ isReply ? 'justify-end' : 'justify-start' }}">
-                    {% if is_granted('ROLE_USER') %}
-                        <button onclick="setupReply(event, {{ comment.id }}, '{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}')" class="text-xs text-gray-500 hover:text-blue-600 font-semibold">Répondre</button>
-                        <a href="{{ path('app_signalement_user', {'id': comment.utilisateur.id }) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Reporter cet utilisateur ?')">Reporter</a>
-                    {% endif %}
-                    {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_commentaire_delete', {'id': comment.id}) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Supprimer ?')">Effacer</a>
-                    {% endif %}
+                <div class="flex-1">
+                    <div class="{{ isReply ? 'bg-gray-50' : 'bg-white' }} p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-900 text-sm">
+                                {{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}
+                                {% if 'ROLE_ADMIN' in comment.utilisateur.roles %}
+                                    <span class="text-xs text-red-500"> - Admin</span>
+                                {% elseif 'ROLE_MODERATOR' in comment.utilisateur.roles %}
+                                    <span class="text-xs text-yellow-500"> - Modérateur</span>
+                                {% endif %}
+                                </span>
+                            </span>
+                            <span class="text-xs text-gray-400">{{ comment.date|date('d/m/Y H:i') }}</span>
+                        </div>
+                        
+                        <p class="text-gray-800 text-sm">
+                            {# On ajoute la mention si c'est une réponse pour garder le fil #}
+                            {% if isReply and comment.commentaire %}
+                                <span class="text-blue-500 font-medium">@{{ comment.commentaire.utilisateur.nom }}</span>
+                            {% endif %}
+                            {{ comment.description }}
+                        </p>
+                    </div>
+
+                    {# Actions (Répondre / Supprimer) #}
+                    <div class="flex gap-4 mt-1 px-2 {{ isReply ? 'justify-end' : 'justify-start' }}">
+                        {% if is_granted('ROLE_USER') %}
+                            <button onclick="setupReply(event, {{ comment.id }}, '{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}')" class="text-xs text-gray-500 hover:text-blue-600 font-semibold">Répondre</button>
+                            <a href="{{ path('app_signalement_user', {'id': comment.utilisateur.id }) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Reporter cet utilisateur ?')">Reporter</a>
+                        {% endif %}
+                        {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_commentaire_delete', {'id': comment.id}) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Supprimer ?')">Effacer</a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-{% endmacro %}
+    {% endmacro %}
 
-{# --- LE FORMULAIRE CACHÉ (Indispensable pour setupReply) --- #}
-<div id="global-reply-form" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-xl my-4 shadow-sm">
+
+<div id="global-reply-form" class="hidden mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-inner">
     <div class="flex justify-between items-center mb-2">
-        <span class="text-sm font-bold text-blue-800" id="reply-to-title">Réponse</span>
-        <button type="button" class="text-red-500 text-xs font-bold" onclick="cancelReply()">Annuler</button>
+        <span id="reply-to-title" class="text-sm font-bold text-blue-600">Réponse à...</span>
+        <button onclick="cancelReply()" class="text-xs text-gray-400 hover:text-black">Annuler</button>
     </div>
     
     {{ form_start(formR) }}
-        <input type="hidden" name="commentaireID" id="input-parent-id">
-        <div class="space-y-2">
-            {{ form_widget(formR.description, {'attr': {'class': 'w-full rounded-lg border-gray-300 text-sm', 'placeholder': 'Votre réponse...'}}) }}
+        {# Champ description stylisé #}
+        {{ form_widget(formR.description, {
+            'attr': {
+                'class': 'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all resize-none text-sm',
+                'placeholder': 'Votre réponse...',
+                'rows': '2'
+            }
+        }) }}
+
+      
+        <input type="hidden" name="parent_id" id="input-parent-id" value="">
+        
+     
+        <div class="hidden">{{ form_rest(formR) }}</div>
+
+        <div class="flex justify-end mt-2">
+            <button type="submit" class="bg-black text-white text-xs font-bold py-2 px-5 rounded-full hover:bg-gray-800 transition-colors">
+                Répondre
+            </button>
         </div>
-        <button type="submit" class="mt-2 px-4 py-1 bg-blue-600 text-white text-sm rounded-lg shadow hover:bg-blue-700 transition">
-            Répondre
-        </button>
     {{ form_end(formR) }}
 </div>
 
 <script>
     function toggleForm(id) {
         const el = document.getElementById(id);
-        el.classList.toggle('hidden');
+        if(el) el.classList.toggle('hidden');
     }
 
     function setupReply(event, id, name) {
-    const form = document.getElementById('global-reply-form');
-    const targetContainer = event.target.closest('.flex-1'); // Trouve la bulle du commentaire
-    
-    document.getElementById('input-parent-id').value = id;
-    document.getElementById('reply-to-title').innerText = "Réponse à " + name;
-    
-    targetContainer.appendChild(form); // Déplace le formulaire sous le texte
-    form.classList.remove('hidden');
-}
+        const form = document.getElementById('global-reply-form');
+        const targetContainer = event.target.closest('.flex-1'); 
+        
+        if(form && targetContainer) {
+            document.getElementById('input-parent-id').value = id;
+            document.getElementById('reply-to-title').innerText = "Réponse à " + name;
+            targetContainer.appendChild(form);
+            form.classList.remove('hidden');
+        }
+    }
 
     function cancelReply() {
         const form = document.getElementById('global-reply-form');
-        form.classList.add('hidden');
-        // On le remet à la fin du document pour éviter qu'il ne disparaisse si un parent est supprimé en DOM
-        document.body.appendChild(form);
+        if(form) {
+            form.classList.add('hidden');
+            document.body.appendChild(form);
+        }
     }
 
+    // Déclaration de la fonction
+    function initSwiper() {
+        const swiperElement = document.querySelector(".js-swiper-personnage");
+        
+        if (swiperElement && !swiperElement.swiper) { // Vérifie si pas déjà initialisé
+            new Swiper(".js-swiper-personnage", {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: ".js-perso-next",
+                    prevEl: ".js-perso-prev",
+                },
+                pagination: {
+                    el: ".js-perso-pagination",
+                    clickable: true,
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                },
+            });
+        }
+    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const swiperPerso = new Swiper(".swiper-perso", {
-            slidesPerView: 1, // 1 perso sur mobile
-            spaceBetween: 20,
-            navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-            },
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-            },
-            breakpoints: {
-                640: {
-                    slidesPerView: 2, // 2 persos sur tablette
-                },
-                1024: {
-                    slidesPerView: 3, // 3 persos sur desktop (comme ta grille initiale)
-                },
-            },
-        });
-    });
+    // --- CRUCIAL : L'APPEL DE LA FONCTION ---
+    // 1. Au chargement initial
+    document.addEventListener('DOMContentLoaded', initSwiper);
+    
+    // 2. Pour Symfony Turbo (si tu l'utilises)
+    document.addEventListener('turbo:load', initSwiper);
+
+    // 3. Appel immédiat par sécurité
+    initSwiper();
 </script>
 {% endblock %}

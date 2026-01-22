@@ -9,9 +9,11 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\TypeInfo\Type\CollectionType;
 use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\Image;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class PersonnageType extends AbstractType
 {
@@ -19,6 +21,16 @@ class PersonnageType extends AbstractType
     {
         $builder
             ->add('nom')
+            ->add('categories_hidden', TextType::class, [
+                'mapped' => false,
+                'attr' => ['class' => 'tag-hidden-input'],
+                'data' => $options['mapped_tags'],
+            ])
+            ->add('tags_hidden', TextType::class, [
+                'mapped' => false,
+                'attr' => ['class' => 'tag-hidden-input'],
+                'data' => $options['mapped_tags']
+            ])
             ->add('image', FileType::class, [
                 'label' => 'Image Principale',
                 'mapped' => false, 
@@ -50,6 +62,9 @@ class PersonnageType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Personnage::class,
+            // On déclare nos options personnalisées ici avec des valeurs par défaut
+            'mapped_tags' => null,
+            'mapped_categories' => null,
         ]);
     }
 }

@@ -1,4 +1,50 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
-{{ form_end(form) }}
+<div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-inner">
+    <h3 class="text-lg font-bold mb-4 text-black">Nouvelle Apparence</h3>
+
+    {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+        
+        {# Champ Titre #}
+        <div>
+            {{ form_label(form.titre, 'Titre', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1'}}) }}
+            {{ form_widget(form.titre, {
+                'attr': {
+                    'class': 'w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-black focus:border-black outline-none transition-all text-sm',
+                    'placeholder': 'Ex: Tenue de combat'
+                }
+            }) }}
+        </div>
+
+        {# Champ Images (Style minimaliste) #}
+        <div>
+            {{ form_label(form.images, 'Photos', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1'}}) }}
+            {{ form_widget(form.images, {
+                'attr': {
+                    'class': 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-black file:text-white hover:file:bg-gray-800 cursor-pointer'
+                }
+            }) }}
+        </div>
+
+        {# Champ Description #}
+        <div>
+            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1'}}) }}
+            {{ form_widget(form.description, {
+                'attr': {
+                    'class': 'w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-black focus:border-black outline-none transition-all text-sm resize-none',
+                    'placeholder': 'Détails sur cette apparence...',
+                    'rows': '3'
+                }
+            }) }}
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+            {# Le bouton pour annuler/fermer le toggle #}
+            <button type="button" onclick="toggleForm('ton-id-de-conteneur')" class="px-4 py-2 text-xs font-bold text-gray-400 hover:text-black transition-colors uppercase">
+                Annuler
+            </button>
+            
+            <button type="submit" class="bg-black hover:bg-gray-800 text-white text-xs font-bold py-2 px-6 rounded-lg transition-all shadow-md active:scale-95 uppercase tracking-widest">
+                {{ button_label|default('Enregistrer') }}
+            </button>
+        </div>
+    {{ form_end(form) }}
+</div>

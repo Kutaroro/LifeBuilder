@@ -1,11 +1,110 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Personnage{% endblock %}
+{% block title %}Nouveau Personnage{% endblock %}
 
 {% block body %}
-    <h1>Create new Personnage</h1>
+<div class="max-w-2xl mx-auto my-10">
+    <div class="bg-white p-8">
+        
+        {# 1. EN-TÊTE #}
+        <div class="mb-10 text-center">
+            <h1 class="text-4xl font-bold italic text-gray-800 mb-4">Créer votre personnage</h1>
+            <p class="text-gray-500 text-sm">
+Un nom est tout ce qu’il vous faut. Cela peut être un nom, un prénom ou les deux voir mêmes un simple pseudonyme.Vous avez aussi la possibilité d’ajoutez des catégories et des tags pour retrouver plus facilement votre personnage ou inclure une image principale.            </p>
+        </div>
+        {{ include('personnage/_form.html.twig') }}
+        
+    </div>
+</div>
 
-    {{ include('personnage/_form.html.twig') }}
+<script>
+function initForm() {
+    const containers = document.querySelectorAll('.tag-container');
+    containers.forEach(container => {
+        const visualInput = container.querySelector('.tag-visual-input');
+        const addBtn = container.querySelector('.add-tag-btn');
+        const tagList = container.querySelector('.tag-list');
+        const hiddenInput = container.querySelector('.tag-hidden-input');
+        let tags = hiddenInput.value ? hiddenInput.value.split(',').filter(t => t !== "") : [];
 
-    <a href="{{ path('app_personnage_index', {'id': app.user.id}) }}">back to list</a>
+        function addTag(e, valOverride = null) {
+            if (e) e.preventDefault();
+            const val = valOverride ? valOverride.trim() : visualInput.value.trim();
+            if (val === "" || (!valOverride && tags.includes(val))) {
+                visualInput.value = "";
+                return;
+            }
+            if (!valOverride) tags.push(val);
+            hiddenInput.value = tags.join(',');
+            const badge = document.createElement('div');
+            badge.className = "flex items-center bg-gray-800 text-white px-3 py-1 rounded-full text-xs animate-in fade-in zoom-in duration-200";
+            badge.innerHTML = `${val} <button type="button" class="ml-2 hover:text-red-400">×</button>`;
+            badge.querySelector('button').onclick = () => {
+                tags = tags.filter(t => t !== val);
+                hiddenInput.value = tags.join(',');
+                badge.remove();
+            };
+            tagList.appendChild(badge);
+            visualInput.value = "";
+        }
+
+        if (tags.length > 0) {
+            const initial = [...tags]; tags = [];
+            initial.forEach(t => addTag(null, t));
+        }
+
+        addBtn.onclick = (e) => addTag(e);
+        visualInput.onkeydown = (e) => { if (e.key === 'Enter') addTag(e); };
+    });
+
+    // Aperçus images
+    let galleryFiles = [];
+    const mainIn = document.querySelector('.image-preview-input');
+    const gallIn = document.querySelector('.gallery-preview-input');
+
+    function createThumb(file, target, isGall = false, idx = null) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const d = document.createElement('div');
+            d.className = "relative w-20 h-20 rounded-lg overflow-hidden shadow-inner";
+            d.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">
+                           <button type="button" class="absolute top-0 right-0 bg-red-600 text-white text-[10px] p-1">×</button>`;
+            d.querySelector('button').onclick = () => {
+                if(isGall) { galleryFiles.splice(idx, 1); renderGall(); }
+                else { mainIn.value = ""; target.innerHTML = ""; }
+            };
+            target.appendChild(d);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function renderGall() {
+        const target = document.getElementById('gallery-preview');
+        target.innerHTML = "";
+        galleryFiles.forEach((f, i) => createThumb(f, target, true, i));
+    }
+
+    if (mainIn) mainIn.onchange = (e) => {
+        const target = document.getElementById('main-preview');
+        target.innerHTML = "";
+        if (e.target.files[0]) createThumb(e.target.files[0], target);
+    };
+
+    if (gallIn) gallIn.onchange = (e) => {
+        galleryFiles = [...galleryFiles, ...Array.from(e.target.files)].slice(0, 5);
+        renderGall();
+    };
+
+    document.getElementById('personnage-form').onsubmit = function() {
+        if (galleryFiles.length > 0) {
+            const dt = new DataTransfer();
+            galleryFiles.forEach(f => dt.items.add(f));
+            gallIn.files = dt.files;
+        }
+    };
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initForm);
+else initForm();
+</script>
 {% endblock %}

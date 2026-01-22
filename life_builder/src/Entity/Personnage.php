@@ -75,6 +75,12 @@ class Personnage
     #[ORM\OneToMany(targetEntity: Signalement::class, mappedBy: 'personnage')]
     private Collection $signalements;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $tags = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $categories = null;
+
     
     public function __construct()
     {
@@ -357,6 +363,32 @@ class Personnage
 
         return $this;
     }
+
+    public function getTags(): ?array
+    {
+        return $this->tags;
+    }
+
+    public function setTags(?array $tags): static
+    {
+        $this->tags = $tags;
+
+        return $this;
+    }
+
+    public function getCategories(): ?array
+    {
+        return $this->categories;
+    }
+
+    public function setCategories(?array $categories): static
+    {
+        $this->categories = $categories;
+
+        return $this;
+    }
+
+    
 
 
     

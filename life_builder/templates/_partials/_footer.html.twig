@@ -1,18 +1,59 @@
-<footer>
-    <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-        <a href="{{ path('app_personnage_catalogue') }}" class="text-3xl font-bold text-gray-800">C'est temp jsp quoi mettre</a>
-        <nav>
-            <ul class="flex space-x-4">
-                <li><a href="{{ path('app_personnage_catalogue') }}" class="text-gray-600 hover:text-gray-800">Tous les personnages </a></li>
-                <li><a href="{{ path('app_personnage_index', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mes personnages</a></li>
-                <li><a href="{{ path('app_utilisateur', {'id': app.user.id}) }}" class="text-gray-600 hover:text-gray-800">Mon profil</a></li>
-                {% if app.user %}
-                    <li><a href="{{ path('app_logout') }}" class="text-gray-600 hover:text-gray-800">Logout</a></li>
-                {% else %}
-                    <li><a href="{{ path('app_login') }}" class="text-gray-600 hover:text-gray-800">Login</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </div>
+<footer class="bg-[#1A1A1A] text-white mt-20">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+            
+            {# Colonne 1 : Logo / Slogan #}
+            <div class="col-span-1 md:col-span-1">
+                <a href="{{ path('app_personnage_catalogue') }}" class="text-2xl font-bold tracking-tighter">
+                    LifeBuilder™<span class="text-gray-500">.</span>
+                </a>
+                <p class="mt-4 text-sm text-gray-400 leading-relaxed">
+                    Un slogan mais j'ai pas d'idée.
+                </p>
+            </div>
 
+            {# Colonne 2 : Navigation #}
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6">Navigation</h4>
+                <ul class="space-y-4 text-sm">
+                    <li><a href="{{ path('app_personnage_catalogue') }}" class="text-gray-300 hover:text-white transition">Catalogue</a></li>
+                    {% if app.user %}
+                        <li><a href="{{ path('app_personnage_index', {'id': app.user.id}) }}" class="text-gray-300 hover:text-white transition">Mes Personnages</a></li>
+                        <li><a href="{{ path('app_utilisateur', {'id': app.user.id}) }}" class="text-gray-300 hover:text-white transition">Mon Profil</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            {# Colonne 3 : Légal / Support #}
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6">Aide</h4>
+                <ul class="space-y-4 text-sm text-gray-300">
+                    <li><a href="#" class="hover:text-white transition">Conditions d'utilisation</a></li>
+                    <li><a href="#" class="hover:text-white transition">Signaler un abus</a></li>
+                    <li><a href="#" class="hover:text-white transition">Contact</a></li>
+                </ul>
+            </div>
+
+            {# Colonne 4 : Action #}
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6">Compte</h4>
+                {% if app.user %}
+                    <a href="{{ path('app_logout') }}" class="inline-block border border-gray-700 px-6 py-2 rounded-full text-xs font-bold hover:bg-white hover:text-black transition">DÉCONNEXION</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="inline-block bg-white text-black px-6 py-2 rounded-full text-xs font-bold hover:bg-gray-200 transition">CONNEXION</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Bas du footer #}
+        <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-xs text-gray-500">
+                &copy; {{ "now"|date("Y") }} LifeBuilder™. Tous droits réservés enfin je pense.
+            </p>
+            <div class="flex gap-6">
+                {# Icônes sociales fictives ou liens #}
+                <span class="text-gray-600 text-xs">Ici des réseaux sociaux</span>
+            </div>
+        </div>
+    </div>
 </footer>

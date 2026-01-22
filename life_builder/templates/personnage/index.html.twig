@@ -1,37 +1,138 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Personnage index{% endblock %}
+{% block title %}Mes Personnages{% endblock %}
 
 {% block body %}
-    <h1>Personnage index</h1>
+<div class="bg-gray-50 min-h-screen">
+    {# --- SECTION HERO & RECHERCHE --- #}
+    <div class="relative h-[400px] flex items-center justify-center overflow-hidden">
+        {# Image de fond type "Poires" ou texture abstraite #}
+        <img src="{{asset('/assets/Mikai.png') }}" 
+             class="absolute inset-0 w-full h-full object-cover opacity-50 shadow-inner" alt="Background">
+        
+        <div class="relative z-10 text-center px-4 w-full max-w-2xl">
+            <h1 class="text-6xl font-black text-gray-900 mb-6 tracking-tighter">Mes personnages</h1>
+            
+            <form action="{{ path('app_personnage_index', {'id' : app.user.id}) }}" method="GET" class="relative group">
+                <input type="text" name="search" value="{{ app.request.query.get('search') }}"
+                       placeholder="Rechercher un personnage..." 
+                       class="w-full pl-12 pr-4 py-4 rounded-full border-none shadow-2xl focus:ring-2 focus:ring-black transition-all outline-none text-lg">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </form>
+        </div>
+    </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nom</th>
-                <th>Image</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for personnage in personnages %}
-            <tr>
-                <td>{{ personnage.id }}</td>
-                <td>{{ personnage.nom }}</td>
-                <td>{{ personnage.image }}</td>
-                <td>
-                    <a href="{{ path('app_personnage_show', {'id': personnage.id}) }}">show</a>
-                    <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        {# --- SECTION FILTRES (Tags & Categories) --- #}
+        <div class="mb-12 space-y-4">
+            {# --- CATÉGORIES --- #}
+            <div class="flex flex-wrap gap-2">
+                {# Bouton TOUT pour les catégories #}
+                <a href="{{ path('app_personnage_index', {'id': utilisateur.id, 'tag': activeTag}) }}" 
+                class="px-3 py-1 rounded-md text-xs font-bold uppercase {{ not activeCategory ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600' }}">
+                Toutes les catégories
+                </a>
 
-    <a href="{{ path('app_personnage_new') }}">Create new</a>
+                {% for cat in categories %}
+                    <a href="{{ path('app_personnage_index', {'id': utilisateur.id, 'category': cat, 'tag': activeTag}) }}" 
+                    class="px-3 py-1 rounded-md text-xs font-bold uppercase transition 
+                    {{ activeCategory == cat ? 'bg-blue-600 text-white' : 'bg-black text-white hover:bg-gray-800' }}">
+                        {{ cat }}
+                    </a>
+                {% endfor %}
+            </div>
+
+            {# --- TAGS --- #}
+            <div class="flex flex-wrap gap-2 mt-4">
+                {# Bouton TOUT pour les tags #}
+                <a href="{{ path('app_personnage_index', {'id': utilisateur.id, 'category': activeCategory}) }}" 
+                class="px-3 py-1 border rounded-md text-xs font-bold {{ not activeTag ? 'bg-blue-100 border-blue-600 text-blue-600' : 'border-gray-300 text-gray-400' }}">
+                #Tous
+                </a>
+
+                {% for t in tags %}
+                    <a href="{{ path('app_personnage_index', {'id': utilisateur.id, 'tag': t, 'category': activeCategory}) }}" 
+                    class="px-3 py-1 border rounded-md text-xs font-bold transition
+                    {{ activeTag == t ? 'bg-blue-100 border-blue-600 text-blue-600' : 'border-gray-300 text-gray-600 hover:border-black' }}">
+                        #{{ t }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# --- GRILLE DE PERSONNAGES --- #}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for personnage in personnages %}
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 group border border-gray-100">
+                    {# Image du perso #}
+                    <a href="{{ path('app_personnage_show', {'id': personnage.id}) }}" class="block relative h-64 overflow-hidden">
+                        <img src="{{ asset('uploads/personnages/' ~ personnage.image) }}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                             alt="{{ personnage.nom }}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                    </a>
+
+                    {# Infos du perso #}
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-2xl font-bold text-gray-900 leading-tight">{{ personnage.nom }}</h2>
+                            
+                        </div>
+                        
+                        <p class="text-gray-500 text-sm line-clamp-2 mb-4">
+                            {{ personnage.description|default('Aucune description...') }}
+                        </p>
+
+                        <div class="flex gap-2">
+                            {% for cat in personnage.categories|slice(0, 2) %}
+                                <span class="text-[10px] font-black uppercase text-gray-400">{{ cat }}</span>
+                            {% endfor %}
+                        </div>
+
+                        {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') or (is_granted('ROLE_MODERATOR') and app.user.category == "Personnage") and 'ROLE_ADMIN' not in user.roles and 'ROLE_MODERATOR' not in user.roles %}  
+
+                            <div class="relative inline-block text-left dropdown-container mr-8">
+                            <button type="button" class="dropdown-button text-gray-400 hover:text-black focus:outline-none">
+                                <span class="text-2xl">•••</span>
+                            </button>
+
+                            <div class="dropdown-menu hidden absolute  mt-2 w-48 bg-white border-2 border-black rounded-xl shadow-lg z-50 overflow-hidden">
+                                <div class="py-1">
+                                        <a href="{{path('app_personnage_edit', {'id' : personnage.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                            Modifier le personnage
+                                        </a>
+                                        
+                                        <a href="{{path('app_personnage_delete', {'id' : personnage.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                            Supprimer le personnage (FAIS PAS CA FAUT QUE JE METTES UN IS_DELETED)
+                                        </a>
+                                        
+                                                
+                            
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}  
+
+
+
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-span-full py-20 text-center">
+                    <p class="text-gray-400 italic text-lg">Aucun personnage trouvé...</p>
+                    <a href="{{ path('app_personnage_new') }}" class="mt-4 inline-block text-black font-bold border-b-2 border-black">En créer un ?</a>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# --- BOUTON AJOUTER (Flottant ou fixe) --- #}
+        <div class="mt-16 text-center">
+            <a href="{{ path('app_personnage_new') }}" class="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform">
+                <span>+</span> Créer un nouveau personnage
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -27,22 +27,92 @@ use Symfony\Component\Form\FormFactoryInterface;
 #[Route('/personnage')]
 final class PersonnageController extends AbstractController
 {
-    #[Route('/index/{id}', name: 'app_personnage_index', methods: ['GET'])]
-    public function index(PersonnageRepository $personnageRepository, Utilisateur $utilisateur): Response
-    {   
-     
+    #[Route('/index/{id}', name: 'app_personnage_index', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function index(
+        PersonnageRepository $personnageRepository, 
+        Utilisateur $utilisateur, 
+        Request $request
+    ): Response {   
+        // On récupère TOUT via $request->query (le contenu après le ?)
+        $search = $request->query->get('search');
+        $categorie = $request->query->get('category');
+        $tag = $request->query->get('tag');
+
+        // Le reste de ta logique est bonne
+        $personnages = $personnageRepository->findByFilters($utilisateur->getId(), $search, $categorie, $tag);      
+        
+        $allPersos = $personnageRepository->findBy(['utilisateur' => $utilisateur]);
+        $categoriesDispo = [];
+        $tagsDispo = [];
+
+        foreach ($allPersos as $p) {
+            $categoriesDispo = array_merge($categoriesDispo, $p->getCategories() ?? []);
+            $tagsDispo = array_merge($tagsDispo, $p->getTags() ?? []);
+        }
+
         return $this->render('personnage/index.html.twig', [
-            'personnages' => $personnageRepository->findBy(
-            ['utilisateur' => $utilisateur]),
+            'personnages' => $personnages,
+            'categories' => array_unique($categoriesDispo),
+            'tags' => array_unique($tagsDispo),
+            'utilisateur' => $utilisateur,
+            'activeCategory' => $categorie,
+            'activeTag' => $tag
         ]);
     }
+    //     $personnages = $personnageRepository->findBy(
+    //         ['utilisateur' => $utilisateur],
+    //     );
+
+    //     $query = $request->query->get('search');
+
+    //     if ($query) {
+    //         if ($query) {
+           
+    //         $personnages = $personnageRepository->searchByKeyword($query, $utilisateur->getId());
+    //         }
+    //     }
+
+    //     // Extraction propre des catégories et tags uniques depuis la liste des personnages
+    //     $categories = [];
+    //     $tags = [];
+
+    //     foreach ($personnages as $p) {
+    //         if ($p->getCategories()) {
+    //             $categories = array_merge($categories, $p->getCategories());
+    //         }
+    //         if ($p->getTags()) {
+    //             $tags = array_merge($tags, $p->getTags());
+    //         }
+    //     }     
+    //     return $this->render('personnage/index.html.twig', [
+    //         'personnages' => $personnages,
+    //         'categories' => array_unique(array_filter($categories)),
+    //         'tags' => array_unique(array_filter($tags)),
+    //     ]);
+    
 
     #[Route('/catalogue', name: 'app_personnage_catalogue', methods: ['GET'])]
-    public function catalogue(PersonnageRepository $personnageRepository): Response
+    public function catalogue(PersonnageRepository $personnageRepository,Request $request): Response
     {   
-        $personnages = $personnageRepository->findAll();
+        //$personnages = $personnageRepository->findAll();
+
+        
+        // $personnagesPublics = $personnageRepository
+        //     ->createQueryBuilder('p')
+        //     ->andWhere('p.isPublic = :public')
+        //     ->setParameter('public', true)
+        //     ->orderBy('p.nom', 'ASC')
+        //     ->getQuery()
+        //     ->getResult();
+
+        $search = $request->query->get('search');
+        $categorie = $request->query->get('category');
+        $tag = $request->query->get('tag');
+        $personnagesPublics = $personnageRepository->findAllPublicByFilters($search, $categorie, $tag);      
+
+
         return $this->render('personnage/catalogue.html.twig', [
-            'personnages' => $personnages,
+            'personnages' => $personnagesPublics,
             'utilisateur' => $this->getUser(),
         ]);
     }
@@ -85,10 +155,20 @@ final class PersonnageController extends AbstractController
             $personnage->setCreatedAt(new DateTimeImmutable());
             $personnage->setModifiedAt(new DateTimeImmutable());
 
-            
+            // Dans ton Contrôleur
+            $catData = $form->get('categories_hidden')->getData();
+            if ($catData) {
+                $personnage->setCategories(array_filter(array_map('trim', explode(',', $catData))));
+            }
+
+            $tagData = $form->get('tags_hidden')->getData();
+            if ($tagData) {
+                $personnage->setTags(array_filter(array_map('trim', explode(',', $tagData))));
+            }
+
             $entityManager->persist($personnage);
             $entityManager->flush();
-            return $this->redirectToRoute('app_personnage_index', ['id' => $this->getUser()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_personnage_index', ['id' => $personnage->getUtilisateur()->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('personnage/new.html.twig', [
@@ -213,10 +293,25 @@ final class PersonnageController extends AbstractController
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
         }
 
-        $form = $this->createForm(PersonnageType::class, $personnage);
+        $tagsArray = $personnage->getTags() ?? [];
+        $catsArray = $personnage->getCategories() ?? [];
+        $form = $this->createForm(PersonnageType::class, $personnage, [
+                'mapped_tags' => implode(',', $tagsArray),
+                'mapped_categories' => implode(',', $catsArray),
+            ]);
+        //$form = $this->createForm(PersonnageType::class, $personnage);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // ÉTAPE B : Récupérer les chaînes envoyées par le JS et les retransformer en TABLEAUX
+            $tagsString = $form->get('tags_hidden')->getData();
+            $catsString = $form->get('categories_hidden')->getData();
+
+            // On nettoie et on transforme en array : "A, B" -> ["A", "B"]
+            $personnage->setTags($tagsString ? explode(',', $tagsString) : []);
+            $personnage->setCategories($catsString ? explode(',', $catsString) : []);
+
 
             $file=$form->get('image')->getData();
             if ($file) {

@@ -1,4 +1,37 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{# commentaire/_form.html.twig #}
+
+{{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+    
+    <div class="relative">
+        {# Utilisation du champ 'description' défini dans ton CommentaireType #}
+        {{ form_widget(form.description, {
+            'attr': {
+                'class': 'w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all resize-none placeholder-gray-400 text-gray-700 shadow-sm',
+                'placeholder': 'Votre message...',
+                'rows': '3'
+            }
+        }) }}
+        
+        {# Affichage des erreurs spécifiques au champ description #}
+        {% if form_errors(form.description) %}
+            <div class="text-red-500 text-xs mt-1 ml-2">
+                {{ form_errors(form.description) }}
+            </div>
+        {% endif %}
+    </div>
+
+    {# On cache le widget du champ Hidden 'commentaire' s'il est présent pour éviter un affichage vide #}
+    {% if form.commentaire is defined %}
+        {{ form_widget(form.commentaire) }}
+    {% endif %}
+
+    <div class="flex justify-end">
+        <button type="submit" class="bg-[#2D2D2D] hover:bg-black text-white font-bold py-2.5 px-8 rounded-full transition-all active:scale-95 shadow-md flex items-center gap-2 group">
+            <span>{{ button_label|default('Publier') }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+        </button>
+    </div>
+
 {{ form_end(form) }}

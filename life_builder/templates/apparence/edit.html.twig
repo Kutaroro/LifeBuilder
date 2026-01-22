@@ -7,7 +7,7 @@
 
     {{ include('apparence/_form.html.twig', {'button_label': 'Update'}) }}
 
-    <a href="{{ path('app_personnage_show', {'id': histoire.personnage.id}) }}">back to list</a>
+    <a href="{{ path('app_personnage_show', {'id': apparence.personnage.id}) }}">back to list</a>
 
     {{ include('apparence/_delete_form.html.twig') }}
 {% endblock %}
