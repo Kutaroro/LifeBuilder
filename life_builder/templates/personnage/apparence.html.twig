@@ -39,88 +39,91 @@
                         </div>
                     {% endif %}
                 </div>
-
-                <section class="space-y-8">
-                    <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Apparence</h2>
-                    
-                    <div class="space-y-12">
-                        {% for apparence in apparences %}
-                            <div class="flex flex-col md:flex-row gap-8 items-start group">
-                                
-                                {# 1. Colonne Image Principale (seulement si images présentes) #}
-                                {% if apparence.images|length > 0 %}
-                                    <div class="w-full md:w-1/4 lg:w-1/5">
-                                        <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden border-2 border-black relative">
-                                            <img src="{{ asset('uploads/apparences/' ~ apparence.images[0]) }}" 
-                                                class="w-full h-full object-cover" 
-                                                alt="{{ apparence.titre }}">
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {# 2. Colonne Contenu #}
-                                <div class="flex-1 space-y-4 w-full">
-                                    <div class="flex justify-between items-start">
-                                        <h3 class="text-xl font-bold">{{ apparence.titre }}</h3>
-                                                <div class="relative inline-block text-left dropdown-container">
-                                                    <button type="button" class="dropdown-button text-gray-400 hover:text-black focus:outline-none">
-                                                        <span class="text-2xl">•••</span>
-                                                    </button>
-
-                                                    <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black rounded-xl shadow-lg z-50 overflow-hidden">
-                                                        <div class="py-1">
-                                                            <button type="button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-300 flex items-center gap-2"
-                                                                    onclick="toggleForm('form-apparence{{ apparence.id }}')">
-                                                                    Modifier l'ordre d'affichage
-                                                            </button>
-                                                            <a href="{{path('app_apparence_edit', {'id' : apparence.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                                                Modifier
-                                                            </a>
-                                                            {{ include('apparence/_delete_form.html.twig') }}
-                                                            
-                                                        </div>
-                                                    </div>
-
-                                                    <form id="form-apparence{{ apparence.id }}" 
-                                                        action="{{ path('app_personnage_apparence_ordre', {'personnageId': personnage.id, 'apparenceId': apparence.id}) }}" 
-                                                        method="POST"
-                                                        class="hidden mt-3 p-3 bg-gray-100 rounded">
-                                                        <label for="ordreAffichage-{{ apparence.id }}" class="block text-gray-700 mb-1">
-                                                            Nouvel ordre d'affichage:
-                                                        </label>
-                                                        <input type="number" id="ordreAffichage-{{ apparence.id }}" name="ordreAffichage"
-                                                            min="1" required
-                                                            class="border rounded px-2 py-1 w-20">
-                                                        <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
-                                                        <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
-                                                                onclick="toggleForm('form-apparence{{ apparence.id }}')">Annuler</button>
-                                                    </form>
-
-
-                                                </div>
-                                    </div>
-
-                                    <p class="text-gray-600 leading-relaxed">
-                                        {{ apparence.description }}
-                                    </p>
-
-                                    {# 3. Miniatures (seulement si plus d'une image) #}
-                                    {% if apparence.images|length > 1 %}
-                                        <div class="flex flex-wrap gap-3 mt-4">
-                                            {% for img in apparence.images|slice(1) %}
-                                                <div class="w-16 h-16 rounded-xl border-2 border-black overflow-hidden bg-gray-50">
-                                                    <img src="{{ asset('uploads/apparences/' ~ img) }}" 
-                                                        class="w-full h-full object-cover">
-                                                </div>
-                                            {% endfor %}
+                {% if apparences is empty %}
+                    <p class="text-center text-gray-500">Aucune description d'apparence à afficher.</p>
+                {% else %}
+                    <section class="space-y-8">
+                        <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Apparence</h2>
+                        
+                        <div class="space-y-12">
+                            {% for apparence in apparences %}
+                                <div class="flex flex-col md:flex-row gap-8 items-start group">
+                                    
+                                    {# 1. Colonne Image Principale (seulement si images présentes) #}
+                                    {% if apparence.images|length > 0 %}
+                                        <div class="w-full md:w-1/4 lg:w-1/5">
+                                            <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden border-2 border-black relative">
+                                                <img src="{{ asset('uploads/apparences/' ~ apparence.images[0]) }}" 
+                                                    class="w-full h-full object-cover" 
+                                                    alt="{{ apparence.titre }}">
+                                            </div>
                                         </div>
                                     {% endif %}
-                                </div>
 
-                            </div>
-                        {% endfor %}
-                    </div>
-                </section>
+                                    {# 2. Colonne Contenu #}
+                                    <div class="flex-1 space-y-4 w-full">
+                                        <div class="flex justify-between items-start">
+                                            <h3 class="text-xl font-bold">{{ apparence.titre }}</h3>
+                                                    <div class="relative inline-block text-left dropdown-container">
+                                                        <button type="button" class="dropdown-button text-gray-400 hover:text-black focus:outline-none">
+                                                            <span class="text-2xl">•••</span>
+                                                        </button>
+
+                                                        <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black rounded-xl shadow-lg z-50 overflow-hidden">
+                                                            <div class="py-1">
+                                                                <button type="button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-300 flex items-center gap-2"
+                                                                        onclick="toggleForm('form-apparence{{ apparence.id }}')">
+                                                                        Modifier l'ordre d'affichage
+                                                                </button>
+                                                                <a href="{{path('app_apparence_edit', {'id' : apparence.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                                                    Modifier
+                                                                </a>
+                                                                {{ include('apparence/_delete_form.html.twig') }}
+                                                                
+                                                            </div>
+                                                        </div>
+
+                                                        <form id="form-apparence{{ apparence.id }}" 
+                                                            action="{{ path('app_personnage_apparence_ordre', {'personnageId': personnage.id, 'apparenceId': apparence.id}) }}" 
+                                                            method="POST"
+                                                            class="hidden mt-3 p-3 bg-gray-100 rounded">
+                                                            <label for="ordreAffichage-{{ apparence.id }}" class="block text-gray-700 mb-1">
+                                                                Nouvel ordre d'affichage:
+                                                            </label>
+                                                            <input type="number" id="ordreAffichage-{{ apparence.id }}" name="ordreAffichage"
+                                                                min="1" required
+                                                                class="border rounded px-2 py-1 w-20">
+                                                            <button type="submit" class="px-2 py-1 bg-green-600 text-white rounded ml-2">Valider</button>
+                                                            <button type="button" class="px-2 py-1 bg-gray-400 text-white rounded ml-1"
+                                                                    onclick="toggleForm('form-apparence{{ apparence.id }}')">Annuler</button>
+                                                        </form>
+
+
+                                                    </div>
+                                        </div>
+
+                                        <p class="text-gray-600 leading-relaxed">
+                                            {{ apparence.description }}
+                                        </p>
+
+                                        {# 3. Miniatures (seulement si plus d'une image) #}
+                                        {% if apparence.images|length > 1 %}
+                                            <div class="flex flex-wrap gap-3 mt-4">
+                                                {% for img in apparence.images|slice(1) %}
+                                                    <div class="w-16 h-16 rounded-xl border-2 border-black overflow-hidden bg-gray-50">
+                                                        <img src="{{ asset('uploads/apparences/' ~ img) }}" 
+                                                            class="w-full h-full object-cover">
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
 
     </main>
 

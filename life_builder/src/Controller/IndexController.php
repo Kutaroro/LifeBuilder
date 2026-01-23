@@ -15,7 +15,7 @@ final class IndexController extends AbstractController{
     public function index(PersonnageRepository $personnageRepository): Response
     {
         $personnagesPopulaires = $personnageRepository->findTopPopulaires(5);
-        $personnagesRecents = $personnageRepository->findBy([], ['createdAt' => 'DESC'], 5, 0);
+        $personnagesRecents = $personnageRepository->findBy(['isPublic' => true], ['createdAt' => 'DESC'], 5, 0);
         return $this->render('index/index.html.twig', [
            'persosPop' => $personnagesPopulaires,
            'persosRecents' => $personnagesRecents

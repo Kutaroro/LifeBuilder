@@ -25,9 +25,11 @@ public function findTopPopulaires(int $limit ): array
         ->leftJoin('p.commentaires', 'c')
         // On sélectionne le personnage et on compte les commentaires
         ->addSelect('COUNT(c) AS HIDDEN count_comments')
+        ->Where('p.isPublic = :public')
         ->groupBy('p.id')
         // On trie par le nombre de commentaires décroissant
         ->orderBy('count_comments', 'DESC')
+        ->setParameter('public', true)
         ->setMaxResults($limit)
         ->getQuery()
         ->getResult();

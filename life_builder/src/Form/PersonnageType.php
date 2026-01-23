@@ -24,12 +24,15 @@ class PersonnageType extends AbstractType
             ->add('categories_hidden', TextType::class, [
                 'mapped' => false,
                 'attr' => ['class' => 'tag-hidden-input'],
-                'data' => $options['mapped_tags'],
+                'data' => $options['mapped_categories'],
+                'required' => false,
             ])
             ->add('tags_hidden', TextType::class, [
                 'mapped' => false,
                 'attr' => ['class' => 'tag-hidden-input'],
-                'data' => $options['mapped_tags']
+                'data' => $options['mapped_tags'],
+                'required' => false,
+
             ])
             ->add('image', FileType::class, [
                 'label' => 'Image Principale',

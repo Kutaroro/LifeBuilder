@@ -391,5 +391,22 @@ class Personnage
     
 
 
+    // Dans Entity/Personnage.php
+
+public function getCategoriesHidden(): string
+{
+    // On transforme le tableau en chaîne pour le JS (ex: "Blob,Gris")
+    return implode(',', $this->categories ?? []);
+}
+
+public function setCategoriesHidden(?string $categories): self
+{
+    // On transforme la chaîne du formulaire en tableau pour la BDD
+    if ($categories) {
+        $this->categories = explode(',', $categories);
+    }
+    return $this;
+}
+
     
 }

@@ -1,6 +1,37 @@
-<div class="grid grid-cols-4 flex justify-center items-center  bg-[url(https://gaming-cdn.com/images/products/2616/orig/the-legend-of-zelda-breath-of-the-wild-switch-jeu-nintendo-eshop-europe-cover.jpg?v=1730381682)] ">
+{# <div class="grid grid-cols-4 flex justify-center items-center  bg-[url(https://gaming-cdn.com/images/products/2616/orig/the-legend-of-zelda-breath-of-the-wild-switch-jeu-nintendo-eshop-europe-cover.jpg?v=1730381682)] ">
             <a href="{{ path('app_personnage_show', {'id': personnage.id}) }}" class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Général</a>            
             <a href="{{ path('app_show_persoLie', {'id': personnage.id}) }}" class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Personnages liés</a>
             <a href="{{ path('app_show_apparence', {'id': personnage.id}) }}"  class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Apparence</a>
             <a href="{{ path('app_show_histoire', {'id': personnage.id}) }}" class="font-bold transition bg-gray-100/50 p-8 hover:bg-gray-700/50 text-white flex justify-center">Histoire</a>
+</div> #}
+
+{# On définit une variable pour la route actuelle pour simplifier le code #}
+{% set current_route = app.request.attributes.get('_route') %}
+
+<div class="grid grid-cols-4 bg-cover bg-center" 
+     style="background-image: url('{{ asset('assets/KaelB.png') }}');">
+    
+    {# Lien Général #}
+    <a href="{{ path('app_personnage_show', {'id': personnage.id}) }}" 
+       class="font-bold transition p-8 flex justify-center {{ current_route == 'app_personnage_show' ? 'bg-gray-800/80 text-white' : 'bg-gray-100/50 text-white hover:bg-gray-700/50' }}">
+       Général
+    </a>
+
+    {# Lien Personnages Liés #}
+    <a href="{{ path('app_show_persoLie', {'id': personnage.id}) }}" 
+       class="font-bold transition p-8 flex justify-center {{ current_route == 'app_show_persoLie' ? 'bg-gray-800/80 text-white' : 'bg-gray-100/50 text-white hover:bg-gray-700/50' }}">
+       Personnages liés
+    </a>
+
+    {# Lien Apparence #}
+    <a href="{{ path('app_show_apparence', {'id': personnage.id}) }}" 
+       class="font-bold transition p-8 flex justify-center {{ current_route == 'app_show_apparence' ? 'bg-gray-800/80 text-white' : 'bg-gray-100/50 text-white hover:bg-gray-700/50' }}">
+       Apparence
+    </a>
+
+    {# Lien Histoire #}
+    <a href="{{ path('app_show_histoire', {'id': personnage.id}) }}" 
+       class="font-bold transition p-8 flex justify-center {{ current_route == 'app_show_histoire' ? 'bg-gray-800/80 text-white' : 'bg-gray-100/50 text-white hover:bg-gray-700/50' }}">
+       Histoire
+    </a>
 </div>

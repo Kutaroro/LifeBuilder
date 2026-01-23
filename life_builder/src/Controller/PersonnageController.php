@@ -296,9 +296,9 @@ final class PersonnageController extends AbstractController
         $tagsArray = $personnage->getTags() ?? [];
         $catsArray = $personnage->getCategories() ?? [];
         $form = $this->createForm(PersonnageType::class, $personnage, [
-                'mapped_tags' => implode(',', $tagsArray),
-                'mapped_categories' => implode(',', $catsArray),
-            ]);
+            'mapped_tags' => implode(',', $personnage->getTags()), // si tu as des tags
+            'mapped_categories' => implode(',', $personnage->getCategories()),
+        ]);
         //$form = $this->createForm(PersonnageType::class, $personnage);
         $form->handleRequest($request);
 

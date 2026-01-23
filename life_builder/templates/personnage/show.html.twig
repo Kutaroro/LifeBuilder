@@ -6,342 +6,344 @@
 
 {{ include("personnage/headerbis.html.twig") }}
 
+<main>
+    <div class="max-w-5xl mx-auto px-4 py-10 space-y-16 text-gray-800">
 
-<div class="max-w-5xl mx-auto px-4 py-10 space-y-16 text-gray-800">
+        <section class="flex flex-col md:flex-row gap-10">
+            <div class="md:w-3/5 space-y-4">
+                <div class="relative group">
+                    <img src="{{ asset('uploads/personnages/' ~ personnage.image) }}" alt="{{ personnage.nom }}" 
+                        class="w-full h-[500px] object-cover rounded-xl shadow-lg border border-gray-100">
+                </div>
 
-    <section class="flex flex-col md:flex-row gap-10">
-        <div class="md:w-3/5 space-y-4">
-            <div class="relative group">
-                <img src="{{ asset('uploads/personnages/' ~ personnage.image) }}" alt="{{ personnage.nom }}" 
-                     class="w-full h-[500px] object-cover rounded-xl shadow-lg border border-gray-100">
+                
+                <div class="flex gap-4 overflow-x-auto pb-2">
+                    {% if  personnage.imagesSecondaires %}
+                        {% for img in personnage.imagesSecondaires %}
+                            <img src="{{ asset('uploads/personnages/' ~ img) }}" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition">
+                        {% endfor %}
+                    {% endif %}    
+                </div>
             </div>
 
+            <div class="md:w-2/5 space-y-6">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-5xl font-extrabold tracking-tight">{{ personnage.nom }}</h1>
+                        {% if app.user == personnage.utilisateur %}
+                            <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}" 
+                            class="text-gray-400 hover:text-black transition mt-2" title="Éditer le personnage">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.05 8.93a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.27.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                                </svg>                   
+                            </a>
+                            <span class="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
+                                {{ personnage.isPublic ? 'Visible par tous' : 'Privé' }}
+                            </span> 
+                        {% elseif app.user %}  
+                            <a href="{{ path('app_signalement_personnage', {'id': personnage.id }) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Reporter ce personnage?')">Reporter</a>
+                        {% endif %}
+                        
+                    </div>
+
+                    {# Section Catégories #}
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        {% for cat in personnage.categories %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-md bg-gray-900 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                                {{ cat }}
+                            </span>
+                        {% endfor %}
+                    </div>
+
+                    {# Section Tags #}
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        {% for tag in personnage.tags %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:border-gray-400 hover:text-black transition-colors duration-200">
+                                <span class="text-gray-400 mr-1">#</span>{{ tag }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="prose prose-blue text-gray-600 leading-relaxed">
+                    {{ personnage.description|nl2br }}
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-100">
+
+        <section class="space-y-8">
+            <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Apparence</h2>
             
-            <div class="flex gap-4 overflow-x-auto pb-2">
-                {% if  personnage.imagesSecondaires %}
-                    {% for img in personnage.imagesSecondaires %}
-                        <img src="{{ asset('uploads/personnages/' ~ img) }}" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition">
-                    {% endfor %}
-                {% endif %}    
-            </div>
-        </div>
-
-        <div class="md:w-2/5 space-y-6">
-            <div>
-                <div class="flex items-center gap-3">
-                    <h1 class="text-5xl font-extrabold tracking-tight">{{ personnage.nom }}</h1>
-                    {% if app.user == personnage.utilisateur %}
-                        <a href="{{ path('app_personnage_edit', {'id': personnage.id}) }}" 
-                        class="text-gray-400 hover:text-black transition mt-2" title="Éditer le personnage">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
-                                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.05 8.93a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.27.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-                            </svg>                   
-                        </a>
-                        <span class="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
-                            {{ personnage.isPublic ? 'Visible par tous' : 'Privé' }}
-                        </span> 
-                    {% elseif app.user %}  
-                        <a href="{{ path('app_signalement_personnage', {'id': personnage.id }) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Reporter ce personnage?')">Reporter</a>
-                    {% endif %}
-                    
-                </div>
-
-                {# Section Catégories #}
-                <div class="flex flex-wrap gap-2 mt-4">
-                    {% for cat in personnage.categories %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-md bg-gray-900 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
-                            {{ cat }}
-                        </span>
-                    {% endfor %}
-                </div>
-
-                {# Section Tags #}
-                <div class="flex flex-wrap gap-2 mt-3">
-                    {% for tag in personnage.tags %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:border-gray-400 hover:text-black transition-colors duration-200">
-                            <span class="text-gray-400 mr-1">#</span>{{ tag }}
-                        </span>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="prose prose-blue text-gray-600 leading-relaxed">
-                {{ personnage.description|nl2br }}
-            </div>
-        </div>
-    </section>
-
-    <hr class="border-gray-100">
-
-    <section class="space-y-8">
-        <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Apparence</h2>
-        
-        <div class="space-y-12">
-            {% for item in apparences %}
-                <div class="flex flex-col md:flex-row gap-8 items-start group">
-                    
-                    {# 1. Colonne Image Principale (seulement si images présentes) #}
-                    {% if item.images|length > 0 %}
-                        <div class="w-full md:w-1/4 lg:w-1/5">
-                            <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden border-2 border-black relative">
-                                <img src="{{ asset('uploads/apparences/' ~ item.images[0]) }}" 
-                                    class="w-full h-full object-cover" 
-                                    alt="{{ item.titre }}">
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    
-                    <div class="flex-1 space-y-4 w-full">
-                        <div class="flex justify-between items-start">
-                            <h3 class="text-xl font-bold">{{ item.titre }}</h3>
-                            <button class="text-gray-400 hover:text-black text-2xl leading-none">•••</button>
-                        </div>
-
-                        <p class="text-gray-600 leading-relaxed">
-                            {{ item.description }}
-                        </p>
-
-                        {% if item.images|length > 1 %}
-                            <div class="flex flex-wrap gap-3 mt-4">
-                                {% for img in item.images|slice(1) %}
-                                    <div class="w-16 h-16 rounded-xl border-2 border-black overflow-hidden bg-gray-50">
-                                        <img src="{{ asset('uploads/apparences/' ~ img) }}" 
-                                            class="w-full h-full object-cover">
-                                    </div>
-                                {% endfor %}
+            <div class="space-y-12">
+                {% for item in apparences %}
+                    <div class="flex flex-col md:flex-row gap-8 items-start group">
+                        
+                        {# 1. Colonne Image Principale (seulement si images présentes) #}
+                        {% if item.images|length > 0 %}
+                            <div class="w-full md:w-1/4 lg:w-1/5">
+                                <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden border-2 border-black relative">
+                                    <img src="{{ asset('uploads/apparences/' ~ item.images[0]) }}" 
+                                        class="w-full h-full object-cover" 
+                                        alt="{{ item.titre }}">
+                                </div>
                             </div>
                         {% endif %}
+
+                        
+                        <div class="flex-1 space-y-4 w-full">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-xl font-bold">{{ item.titre }}</h3>
+                                <button class="text-gray-400 hover:text-black text-2xl leading-none">•••</button>
+                            </div>
+
+                            <p class="text-gray-600 leading-relaxed">
+                                {{ item.description }}
+                            </p>
+
+                            {% if item.images|length > 1 %}
+                                <div class="flex flex-wrap gap-3 mt-4">
+                                    {% for img in item.images|slice(1) %}
+                                        <div class="w-16 h-16 rounded-xl border-2 border-black overflow-hidden bg-gray-50">
+                                            <img src="{{ asset('uploads/apparences/' ~ img) }}" 
+                                                class="w-full h-full object-cover">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
                     </div>
-
-                </div>
-            {% endfor %}
-        </div>
-    </section>
+                {% endfor %}
+            </div>
+        </section>
 
 
-    <section class="space-y-8 bg-gray-50 -mx-4 px-4 py-12 rounded-3xl">
-        <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Histoires de personnage ></h2>
-        
-        <div class="flex gap-2">
-            {% for categorie in categories %}
-                    <a href="{{ path('app_personnage_show', {'id': personnage.id, 'category': categorie.categorie}) }}" 
-                    class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
-                    {{ categorie.categorie }}
-                    </a>
-            {% endfor %}
-            <a href="{{ path('app_personnage_show', {'id': personnage.id }) }}" 
-                            class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
-                Réinitialiser
-            </a>
-        </div>
-
-        <div class="space-y-12 max-w-3xl">
-            {% for item in histoires %}
-                <div class="relative pl-8 border-l-2 border-gray-200 space-y-2 group">
-                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-black"></div>
-                    <div class="flex justify-between">
-                        <h3 class="text-xl font-bold">{{ item.titre }}</h3>
-                        <button class="text-gray-400">•••</button>
-                    </div>
-                    <p class="text-gray-600 leading-relaxed">{{ item.description }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </section>
-
-
-
-    <section class="space-y-4">
-        <h2 class="text-2xl font-bold">Personnages liés</h2>
+        <section class="space-y-8 bg-gray-50 -mx-4 px-4 py-12 rounded-3xl">
+            <h2 class="text-3xl font-bold border-b-4 border-black inline-block pb-1">Histoires de personnage ></h2>
             
-            <div class="relative px-12"> 
-                {# 'swiper' est obligatoire pour le CSS, 'js-swiper-personnage' est pour ton JS #}
-                <div class="swiper js-swiper-personnage overflow-hidden"> 
-                    <div class="swiper-wrapper"> {# 'swiper-wrapper' est obligatoire #}
-                        {% for item in personnage.persoLies %}
-                            <div class="swiper-slide"> {# 'swiper-slide' est obligatoire #}
-                                <div class="space-y-3">
-                                    <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="group block">
-                                        {% if item.image %}
-                                            <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                                                <img src="{{ asset('uploads/personnages/' ~ item.image) }}" 
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <div class="flex gap-2">
+                {% for categorie in categories %}
+                        <a href="{{ path('app_personnage_show', {'id': personnage.id, 'category': categorie.categorie}) }}" 
+                        class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
+                        {{ categorie.categorie }}
+                        </a>
+                {% endfor %}
+                <a href="{{ path('app_personnage_show', {'id': personnage.id }) }}" 
+                                class="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black hover:bg-black hover:text-white transition">
+                    Réinitialiser
+                </a>
+            </div>
+
+            <div class="space-y-12 max-w-3xl">
+                {% for item in histoires %}
+                    <div class="relative pl-8 border-l-2 border-gray-200 space-y-2 group">
+                        <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-black"></div>
+                        <div class="flex justify-between">
+                            <h3 class="text-xl font-bold">{{ item.titre }}</h3>
+                            <button class="text-gray-400">•••</button>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed">{{ item.description }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+
+
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold">Personnages liés</h2>
+                
+                <div class="relative px-12"> 
+                    {# 'swiper' est obligatoire pour le CSS, 'js-swiper-personnage' est pour ton JS #}
+                    <div class="swiper js-swiper-personnage overflow-hidden"> 
+                        <div class="swiper-wrapper"> {# 'swiper-wrapper' est obligatoire #}
+                            {% for item in personnage.persoLies %}
+                                <div class="swiper-slide"> {# 'swiper-slide' est obligatoire #}
+                                    <div class="space-y-3">
+                                        <a href="{{ path('app_personnage_show', {'id': item.id}) }}" class="group block">
+                                            {% if item.image %}
+                                                <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100">
+                                                    <img src="{{ asset('uploads/personnages/' ~ item.image) }}" 
+                                                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                                </div>
+                                            {% else %}
+                                                <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50">
+                                                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                </div>
+                                            {% endif %}
+                                        </a>
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="font-bold text-lg">{{ item.nom }}</h4>
+                                                <p class="text-xs text-gray-400 italic">Personnage lié</p>
                                             </div>
-                                        {% else %}
-                                            <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center bg-gray-50">
-                                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            </div>
-                                        {% endif %}
-                                    </a>
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h4 class="font-bold text-lg">{{ item.nom }}</h4>
-                                            <p class="text-xs text-gray-400 italic">Personnage lié</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
 
-                {# On peut renommer les boutons pour le JS, mais on garde les classes Swiper pour le look #}
-                <div class="swiper-button-prev js-perso-prev !left-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
-                <div class="swiper-button-next js-perso-next !right-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
-                
-                <div class="swiper-pagination js-perso-pagination !-bottom-8"></div>
-            </div>
-    </section>
-
-    
-    {# --- SECTION COMMENTAIRES --- #}
-<div class="bg-white shadow rounded-lg p-6 max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Commentaires</h2>
-
-    {% if is_granted('ROLE_USER') %}
-        <div id="form-commentaire-principal" class="mb-8">
-            {{ include('commentaire/_form.html.twig', {'form': form}) }}
-        </div>
-    {% endif %}
-
-    <div class="space-y-8">
-        {% import _self as macros %}
-        
-        {% for commentaire in commentaires %}
-            {% if commentaire.commentaire is null %}
-                {# Niveau 1 : Le commentaire parent à GAUCHE #}
-                <div class="grid grid-cols-12 gap-4 border-b border-gray-50 pb-8">
-                    <div class="col-span-11 md:col-span-8">
-                        {{ macros.display_comment(commentaire, formR, false, personnage) }}
-                    </div>
+                    {# On peut renommer les boutons pour le JS, mais on garde les classes Swiper pour le look #}
+                    <div class="swiper-button-prev js-perso-prev !left-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
+                    <div class="swiper-button-next js-perso-next !right-0 !text-black !w-10 !h-10 after:!text-2xl hover:bg-gray-100 rounded-full transition-colors"></div>
                     
-                    {# Niveau 2+ : TOUTES les réponses à DROITE (empilées) #}
-                    <div class="col-span-11 col-start-2 md:col-span-8 md:col-start-5 space-y-4 mt-4">
-                        {% for rep in commentaire.reponses %}
-                            {# On appelle la macro qui va déballer TOUTE l'arborescence ici #}
-                            {{ macros.display_recursive_flat(rep, formR, personnage) }}
-                        {% endfor %}
-                    </div>
+                    <div class="swiper-pagination js-perso-pagination !-bottom-8"></div>
                 </div>
-            {% endif %}
-        {% else %}
-            <p class="text-gray-500 italic text-center">Aucun commentaire pour le moment.</p>
-        {% endfor %}
-    </div>
+        </section>
 
-    {% macro display_recursive_flat(comment, formR, personnage) %}
-        {% import _self as self %}
-
-        {# 1. On affiche la bulle du commentaire actuel (isReply = true) #}
-        {{ self.display_comment(comment, formR, true, personnage) }}
-
-        {# 2. Si ce commentaire a lui-même des réponses, on les affiche à la suite #}
-        {% if comment.reponses|length > 0 %}
-            {% for sub_rep in comment.reponses %}
-                {{ self.display_recursive_flat(sub_rep, formR, personnage) }}
-            {% endfor %}
-        {% endif %}
-    {% endmacro %}
-
-    {# --- MACRO 2 : La logique récursive pour "aplatir" les réponses à droite --- #}
-    {% macro recursive_responses(comment, formR, personnage) %}
-        {% import _self as self %}
         
-        {# On affiche le commentaire actuel #}
-        {{ self.display_single_comment(comment, formR, true, personnage) }}
+        {# --- SECTION COMMENTAIRES --- #}
+    <div class="bg-white shadow rounded-lg p-6 max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Commentaires</h2>
 
-        {# Si ce commentaire a des réponses, on les affiche juste en dessous (toujours dans la même colonne) #}
-        {% if comment.reponses|length > 0 %}
-            <div class="mt-4 space-y-4 border-l-2 border-blue-50 pl-4 ml-2">
-                {% for sub_rep in comment.reponses %}
-                    {{ self.recursive_responses(sub_rep, formR, personnage) }}
-                {% endfor %}
+        {% if is_granted('ROLE_USER') %}
+            <div id="form-commentaire-principal" class="mb-8">
+                {{ include('commentaire/_form.html.twig', {'form': form}) }}
             </div>
         {% endif %}
-    {% endmacro %}
 
-    {% macro display_comment(comment, formR, isReply, personnage) %}
-        <div id="comment-{{ comment.id }}" class="relative group">
-            <div class="flex items-start gap-3 {{ isReply ? 'flex-row-reverse text-right' : '' }}">
-                
-                <div class="flex-shrink-0">
-                    <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
-                        {% if comment.utilisateur and comment.utilisateur.image %}
-                            <img src="{{ asset('uploads/users/' ~ comment.utilisateur.image) }}" alt="Avatar" class="w-full h-full object-cover">
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="flex-1">
-                    <div class="{{ isReply ? 'bg-gray-50' : 'bg-white' }} p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-gray-900 text-sm">
-                                {{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}
-                                {% if 'ROLE_ADMIN' in comment.utilisateur.roles %}
-                                    <span class="text-xs text-red-500"> - Admin</span>
-                                {% elseif 'ROLE_MODERATOR' in comment.utilisateur.roles %}
-                                    <span class="text-xs text-yellow-500"> - Modérateur</span>
-                                {% endif %}
-                                </span>
-                            </span>
-                            <span class="text-xs text-gray-400">{{ comment.date|date('d/m/Y H:i') }}</span>
+        <div class="space-y-8">
+            {% import _self as macros %}
+            
+            {% for commentaire in commentaires %}
+                {% if commentaire.commentaire is null %}
+                    {# Niveau 1 : Le commentaire parent à GAUCHE #}
+                    <div class="grid grid-cols-12 gap-4 border-b border-gray-50 pb-8">
+                        <div class="col-span-11 md:col-span-8">
+                            {{ macros.display_comment(commentaire, formR, false, personnage) }}
                         </div>
                         
-                        <p class="text-gray-800 text-sm">
-                            {# On ajoute la mention si c'est une réponse pour garder le fil #}
-                            {% if isReply and comment.commentaire %}
-                                <span class="text-blue-500 font-medium">@{{ comment.commentaire.utilisateur.nom }}</span>
+                        {# Niveau 2+ : TOUTES les réponses à DROITE (empilées) #}
+                        <div class="col-span-11 col-start-2 md:col-span-8 md:col-start-5 space-y-4 mt-4">
+                            {% for rep in commentaire.reponses %}
+                                {# On appelle la macro qui va déballer TOUTE l'arborescence ici #}
+                                {{ macros.display_recursive_flat(rep, formR, personnage) }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p class="text-gray-500 italic text-center">Aucun commentaire pour le moment.</p>
+            {% endfor %}
+        </div>
+
+        {% macro display_recursive_flat(comment, formR, personnage) %}
+            {% import _self as self %}
+
+            {# 1. On affiche la bulle du commentaire actuel (isReply = true) #}
+            {{ self.display_comment(comment, formR, true, personnage) }}
+
+            {# 2. Si ce commentaire a lui-même des réponses, on les affiche à la suite #}
+            {% if comment.reponses|length > 0 %}
+                {% for sub_rep in comment.reponses %}
+                    {{ self.display_recursive_flat(sub_rep, formR, personnage) }}
+                {% endfor %}
+            {% endif %}
+        {% endmacro %}
+
+        {# --- MACRO 2 : La logique récursive pour "aplatir" les réponses à droite --- #}
+        {% macro recursive_responses(comment, formR, personnage) %}
+            {% import _self as self %}
+            
+            {# On affiche le commentaire actuel #}
+            {{ self.display_single_comment(comment, formR, true, personnage) }}
+
+            {# Si ce commentaire a des réponses, on les affiche juste en dessous (toujours dans la même colonne) #}
+            {% if comment.reponses|length > 0 %}
+                <div class="mt-4 space-y-4 border-l-2 border-blue-50 pl-4 ml-2">
+                    {% for sub_rep in comment.reponses %}
+                        {{ self.recursive_responses(sub_rep, formR, personnage) }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endmacro %}
+
+        {% macro display_comment(comment, formR, isReply, personnage) %}
+            <div id="comment-{{ comment.id }}" class="relative group">
+                <div class="flex items-start gap-3 {{ isReply ? 'flex-row-reverse text-right' : '' }}">
+                    
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
+                            {% if comment.utilisateur and comment.utilisateur.image %}
+                                <img src="{{ asset('uploads/users/' ~ comment.utilisateur.image) }}" alt="Avatar" class="w-full h-full object-cover">
                             {% endif %}
-                            {{ comment.description }}
-                        </p>
+                        </div>
                     </div>
 
-                    {# Actions (Répondre / Supprimer) #}
-                    <div class="flex gap-4 mt-1 px-2 {{ isReply ? 'justify-end' : 'justify-start' }}">
-                        {% if is_granted('ROLE_USER') %}
-                            <button onclick="setupReply(event, {{ comment.id }}, '{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}')" class="text-xs text-gray-500 hover:text-blue-600 font-semibold">Répondre</button>
-                            <a href="{{ path('app_signalement_user', {'id': comment.utilisateur.id }) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Reporter cet utilisateur ?')">Reporter</a>
-                        {% endif %}
-                        {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') %}
-                            <a href="{{ path('app_commentaire_delete', {'id': comment.id}) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Supprimer ?')">Effacer</a>
-                        {% endif %}
+                    <div class="flex-1">
+                        <div class="{{ isReply ? 'bg-gray-50' : 'bg-white' }} p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <a href="{{path('app_utilisateur',{'id':comment.utilisateur.id})}}" >
+                                <span class="font-bold text-gray-900 text-sm">
+                                    {{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}
+                                    {% if 'ROLE_ADMIN' in comment.utilisateur.roles %}
+                                        <span class="text-xs text-red-500"> - Admin</span>
+                                    {% elseif 'ROLE_MODERATOR' in comment.utilisateur.roles %}
+                                        <span class="text-xs text-yellow-500"> - Modérateur</span>
+                                    {% endif %}
+                                    </span>
+                                </span></a>
+                                <span class="text-xs text-gray-400">{{ comment.date|date('d/m/Y H:i') }}</span>
+                            </div>
+                            
+                            <p class="text-gray-800 text-sm">
+                                {# On ajoute la mention si c'est une réponse pour garder le fil #}
+                                {% if isReply and comment.commentaire %}
+                                    <span class="text-blue-500 font-medium">@{{ comment.commentaire.utilisateur.nom }}</span>
+                                {% endif %}
+                                {{ comment.description }}
+                            </p>
+                        </div>
+
+                        {# Actions (Répondre / Supprimer) #}
+                        <div class="flex gap-4 mt-1 px-2 {{ isReply ? 'justify-end' : 'justify-start' }}">
+                            {% if is_granted('ROLE_USER') %}
+                                <button onclick="setupReply(event, {{ comment.id }}, '{{ comment.utilisateur ? comment.utilisateur.nom : 'Anonyme' }}')" class="text-xs text-gray-500 hover:text-blue-600 font-semibold">Répondre</button>
+                                <a href="{{ path('app_signalement_user', {'id': comment.utilisateur.id }) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Reporter cet utilisateur ?')">Reporter</a>
+                            {% endif %}
+                            {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('app_commentaire_delete', {'id': comment.id}) }}" class="text-xs text-gray-400 hover:text-red-600" onclick="return confirm('Supprimer ?')">Effacer</a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
+        {% endmacro %}
+
+
+    <div id="global-reply-form" class="hidden mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-inner">
+        <div class="flex justify-between items-center mb-2">
+            <span id="reply-to-title" class="text-sm font-bold text-blue-600">Réponse à...</span>
+            <button onclick="cancelReply()" class="text-xs text-gray-400 hover:text-black">Annuler</button>
         </div>
-    {% endmacro %}
-
-
-<div id="global-reply-form" class="hidden mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-inner">
-    <div class="flex justify-between items-center mb-2">
-        <span id="reply-to-title" class="text-sm font-bold text-blue-600">Réponse à...</span>
-        <button onclick="cancelReply()" class="text-xs text-gray-400 hover:text-black">Annuler</button>
-    </div>
-    
-    {{ form_start(formR) }}
-        {# Champ description stylisé #}
-        {{ form_widget(formR.description, {
-            'attr': {
-                'class': 'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all resize-none text-sm',
-                'placeholder': 'Votre réponse...',
-                'rows': '2'
-            }
-        }) }}
-
-      
-        <input type="hidden" name="parent_id" id="input-parent-id" value="">
         
-     
-        <div class="hidden">{{ form_rest(formR) }}</div>
+        {{ form_start(formR) }}
+            {# Champ description stylisé #}
+            {{ form_widget(formR.description, {
+                'attr': {
+                    'class': 'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all resize-none text-sm',
+                    'placeholder': 'Votre réponse...',
+                    'rows': '2'
+                }
+            }) }}
 
-        <div class="flex justify-end mt-2">
-            <button type="submit" class="bg-black text-white text-xs font-bold py-2 px-5 rounded-full hover:bg-gray-800 transition-colors">
-                Répondre
-            </button>
-        </div>
-    {{ form_end(formR) }}
-</div>
+        
+            <input type="hidden" name="parent_id" id="input-parent-id" value="">
+            
+        
+            <div class="hidden">{{ form_rest(formR) }}</div>
 
+            <div class="flex justify-end mt-2">
+                <button type="submit" class="bg-black text-white text-xs font-bold py-2 px-5 rounded-full hover:bg-gray-800 transition-colors">
+                    Répondre
+                </button>
+            </div>
+        {{ form_end(formR) }}
+    </div>
+    </div>
+</main>
 <script>
     function toggleForm(id) {
         const el = document.getElementById(id);
