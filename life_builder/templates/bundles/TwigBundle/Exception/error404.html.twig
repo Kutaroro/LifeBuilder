@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page Introuvable (404){% endblock %}
+
+{% block body %}
+<div class="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-6">
+    
+    <div class="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-xl p-8 text-center space-y-6">
+        
+        {# Icône de boussole perdue ou point d'interrogation #}
+        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-500 mx-auto border border-gray-100 shadow-inner">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        </div>
+
+        {# Titres #}
+        <div class="space-y-2">
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Zone Inconnue</h1>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Erreur 404 • Not Found</p>
+        </div>
+
+        {# Message #}
+        <p class="text-gray-600 text-sm leading-relaxed">
+            Olá aventurier. Vous êtes vous perdus?
+            <br>
+            La page que vous recherchez semble s'être volatilisée, ou le lien suivi est expiré. 
+            <br>Vérifiez l'URL ou retournez à la civilisation.
+        </p>
+
+        <hr class="border-gray-100">
+
+        {# Boutons de redirection #}
+        <div class="space-y-3 pt-2">
+            <a href="{{ path('app_home')|default('/') }}" class="block w-full bg-black text-white font-bold py-3 px-4 rounded-xl transition hover:scale-[1.02] active:scale-[0.98] shadow-md text-sm">
+                Retourner à l'accueil
+            </a>
+            
+            <button onclick="history.back()" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition text-sm">
+                Page précédente
+            </button>
+        </div>
+
+    </div>
+
+    {# Footer discret #}
+    <p class="text-xs text-gray-400 mt-8">Life Builder — Vous semblez perdu</p>
+</div>
+{% endblock %}

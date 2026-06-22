@@ -79,7 +79,7 @@ public function findByFilters(int $uId, ?string $search, ?string $cat, ?string $
     $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($em);
     $rsm->addRootEntityFromClassMetadata(Personnage::class, 'p');
 
-    $sql = 'SELECT p.* FROM personnage p WHERE p.utilisateur_id = :uId';
+    $sql = 'SELECT p.* FROM personnage p WHERE p.utilisateur_id = :uId AND p.is_deleted = false'; ;
     $params = ['uId' => $uId];
 
     // 1. Recherche globale
@@ -115,7 +115,7 @@ public function findAllPublicByFilters(?string $search, ?string $cat, ?string $t
     $rsm->addRootEntityFromClassMetadata(Personnage::class, 'p');
 
     // On remplace le filtre utilisateur par is_public = true
-    $sql = 'SELECT p.* FROM personnage p WHERE p.is_Public = true';
+    $sql = 'SELECT p.* FROM personnage p WHERE p.is_Public = true AND p.is_deleted = false';
     $params = [];
 
     // 1. Recherche globale (nom, description, tags, categories)

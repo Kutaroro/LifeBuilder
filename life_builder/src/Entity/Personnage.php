@@ -81,6 +81,11 @@ class Personnage
     #[ORM\Column(nullable: true)]
     private ?array $categories = null;
 
+     #[ORM\Column()]
+    private ?bool $isDeleted = false;
+
+
+
     
     public function __construct()
     {
@@ -409,4 +414,24 @@ public function setCategoriesHidden(?string $categories): self
 }
 
     
+
+    /**
+     * Get the value of isDeleted
+     */ 
+    public function getIsDeleted()
+    {
+        return $this->isDeleted;
+    }
+
+    /**
+     * Set the value of isDeleted
+     *
+     * @return  self
+     */ 
+    public function setIsDeleted($isDeleted)
+    {
+        $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
 }

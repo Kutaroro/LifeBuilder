@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accès Refusé (403){% endblock %}
+
+{% block body %}
+<div class="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-6">
+    
+    <div class="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-xl p-8 text-center space-y-6">
+        
+        {# Icône de bouclier / cadenas #}
+        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mx-auto border border-red-100 shadow-inner">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+        </div>
+
+        {# Titres #}
+        <div class="space-y-2">
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Accès Restreint</h1>
+            <p class="text-xs font-bold uppercase tracking-widest text-red-500">Erreur 403 • Forbidden</p>
+        </div>
+
+        {# Message dynamique #}
+        <p class="text-gray-600 text-sm leading-relaxed">
+            {% if exception is defined and exception.message and 'ROLE_' not in exception.message %}
+                {# Si Symfony transmet un message personnalisé (ex: "Vous n'avez pas le droit de modifier ce profil") #}
+                {{ exception.message }}
+            {% else %}
+                {# Message générique si c'est un refus de rôle brut (ex: pas ADMIN ou MODERATEUR) #}
+                Désolé, vos privilèges actuels ne vous permettent pas d'accéder à cette zone ou d'effectuer cette action.
+            {% endif %}
+        </p>
+
+        <hr class="border-gray-100">
+
+        {# Boutons de redirection #}
+        <div class="space-y-3 pt-2">
+            <a href="{{ path('app_home')|default('/') }}" class="block w-full bg-black text-white font-bold py-3 px-4 rounded-xl transition hover:scale-[1.02] active:scale-[0.98] shadow-md text-sm">
+                Retourner à l'accueil
+            </a>
+            
+            <button onclick="history.back()" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition text-sm">
+                Page précédente
+            </button>
+        </div>
+
+    </div>
+
+    {# Petit footer discret #}
+    <p class="text-xs text-gray-400 mt-8">Life Builder Modération — Zone Sécurisée</p>
+</div>
+{% endblock %}

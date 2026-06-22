@@ -189,7 +189,8 @@ final class PersonnageController extends AbstractController
     #[Route('/{id}/{category}', name: 'app_personnage_show', methods: ['GET','POST'])]
     public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager, FormFactoryInterface $formFactory, ?string $category = null): Response
     {   
-        if (!$personnage->IsPublic()){
+        $user= $this->getUser();
+        if ($user !== $personnage->getUtilisateur() && !$personnage->IsPublic()){
             return $this->redirectToRoute('app_non');
         }
 
@@ -258,22 +259,24 @@ final class PersonnageController extends AbstractController
         $personnagesPublics = $entityManager->getRepository(Personnage::class)
             ->createQueryBuilder('p')
             ->andWhere('p.isPublic = :public')
+            ->andWhere('p.isDeleted = :isDeleted')
             ->andWhere('p.id != :id')
             ->setParameter('public', true)
+            ->setParameter('isDeleted', false)
             ->setParameter('id', $personnage->getId())
             ->orderBy('p.nom', 'ASC')
             ->getQuery()
             ->getResult();
 
         $categories = $entityManager->getRepository(Histoire::class)
-                ->createQueryBuilder('h')
-                ->select('DISTINCT h.categorie')
-                ->where('h.personnage = :p')
-                ->andWhere('h.categorie IS NOT NULL') 
-                ->andWhere("h.categorie != ''")      
-                ->setParameter('p', $personnage)
-                ->getQuery()
-                ->getResult();
+            ->createQueryBuilder('h')
+            ->select('DISTINCT h.categorie')
+            ->where('h.personnage = :p')
+            ->andWhere('h.categorie IS NOT NULL') 
+            ->andWhere("h.categorie != ''")      
+            ->setParameter('p', $personnage)
+            ->getQuery()
+            ->getResult();
 
         usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
             $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
@@ -380,6 +383,26 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
+    // #[IsGranted('ROLE_USER')]
+    // #[Route('/{id}', name: 'app_personnage_delete', methods: ['POST'])]
+    // public function delete(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
+    // {
+    //     $utilisateur = $personnage->getUtilisateur();
+    //     $currentUser = $this->getUser();
+
+    //    // Si on veux supprimer un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
+    //     if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+    //         throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce personnage.");
+    //     }
+
+    //     if ($this->isCsrfTokenValid('delete'.$personnage->getId(), $request->getPayload()->getString('_token'))) {
+    //         $entityManager->remove($personnage);
+    //         $entityManager->flush();
+    //     }
+
+    //     return $this->redirectToRoute('app_personnage_index', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
+    // }
+
     #[IsGranted('ROLE_USER')]
     #[Route('/{id}', name: 'app_personnage_delete', methods: ['POST'])]
     public function delete(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
@@ -387,16 +410,20 @@ final class PersonnageController extends AbstractController
         $utilisateur = $personnage->getUtilisateur();
         $currentUser = $this->getUser();
 
-       // Si on veux supprimer un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
+        // Sécurité : Accès refusé si ce n'est pas son personnage et qu'on n'est pas admin
         if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce personnage.");
         }
 
         if ($this->isCsrfTokenValid('delete'.$personnage->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($personnage);
+            
+            $personnage->setIsDeleted(true);
             $entityManager->flush();
+            
+            $this->addFlash('success', 'Le personnage a bien été supprimé.');
         }
 
+       
         return $this->redirectToRoute('app_personnage_index', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
     }
 
