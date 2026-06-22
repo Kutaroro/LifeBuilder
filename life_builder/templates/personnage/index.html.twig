@@ -11,7 +11,12 @@
              class="absolute inset-0 w-full h-full object-cover opacity-50 shadow-inner" alt="Background">
         
         <div class="relative z-10 text-center px-4 w-full max-w-2xl">
+        {% if app.user.id == utilisateur.id %}
             <h1 class="text-6xl font-black text-gray-900 mb-6 tracking-tighter">Mes personnages</h1>
+        {% else %}
+            <h1 class="text-6xl font-black text-gray-900 mb-6 tracking-tighter">Personnages de {{ utilisateur.nom }}</h1>
+        {% endif %}
+            
             
             <form action="{{ path('app_personnage_index', {'id' : app.user.id}) }}" method="GET" class="relative group">
                 <input type="text" name="search" value="{{ app.request.query.get('search') }}"
@@ -63,11 +68,13 @@
         </div>
 
         {# --- BOUTON AJOUTER (Flottant ou fixe) --- #}
-        <div class="mt-16 text-center my-8">
+        {% if app.user.id == utilisateur.id %}
+            <div class="mt-16 text-center my-8">
             <a href="{{ path('app_personnage_new') }}" class="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform">
                 <span>+</span> Créer un nouveau personnage
             </a>
         </div>
+        {% endif %}
 
 
         {# --- GRILLE DE PERSONNAGES --- #}
@@ -130,7 +137,9 @@
             {% else %}
                 <div class="col-span-full py-20 text-center">
                     <p class="text-gray-400 italic text-lg">Aucun personnage trouvé...</p>
-                    <a href="{{ path('app_personnage_new') }}" class="mt-4 inline-block text-black font-bold border-b-2 border-black">En créer un ?</a>
+                    {% if app.user.id == utilisateur.id %}
+                        <a href="{{ path('app_personnage_new') }}" class="mt-4 inline-block text-black font-bold border-b-2 border-black">En créer un ?</a>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>

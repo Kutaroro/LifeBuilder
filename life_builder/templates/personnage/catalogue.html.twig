@@ -56,7 +56,7 @@
                             {% endfor %}
                         </div>
 
-                        {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') or (is_granted('ROLE_MODERATOR') and app.user.category == "Personnage") and 'ROLE_ADMIN' not in user.roles and 'ROLE_MODERATOR' not in user.roles %}  
+                        {% if app.user == personnage.utilisateur or is_granted('ROLE_ADMIN') or (is_granted('ROLE_MODERATOR') and app.user.category == "Personnage") and 'ROLE_ADMIN' not in utilisateur.roles and 'ROLE_MODERATOR' not in utilisateur.roles %}  
                         <div class="relative inline-block text-left dropdown-container mr-8">
                             <button type="button" class="dropdown-button text-gray-400 hover:text-black focus:outline-none">
                                 <span class="text-2xl">•••</span>

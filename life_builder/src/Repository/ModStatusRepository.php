@@ -16,6 +16,28 @@ class ModStatusRepository extends ServiceEntityRepository
         parent::__construct($registry, ModStatus::class);
     }
 
+    /**
+     * Récupère tous les statuts sanctionnés dont la date de fin est dépassée
+     * @return ModStatus[]
+     */
+    public function findExpiredSanctions(\DateTimeInterface $now): array
+    {
+        return $this->createQueryBuilder('m')
+            // On cible uniquement ceux qui ont encore une sanction active textuellement
+            ->andWhere('m.status != :noSanction') 
+            // ET dont la date de fin est strictement inférieure à "maintenant"
+            ->andWhere('m.dateFin < :now')
+            // On évite les bugs si jamais la dateFin est nulle
+            ->andWhere('m.dateFin IS NOT NULL') 
+            
+            // On injecte les variables pour éviter les injections SQL
+            ->setParameter('noSanction', 'Pas de sanction en cours')
+            ->setParameter('now', $now)
+            
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return ModStatus[] Returns an array of ModStatus objects
     //     */

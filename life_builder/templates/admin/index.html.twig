@@ -71,12 +71,14 @@
                                 En cours de traitement par<br>
                                 <span class="font-bold">“{{ report.mod.nom }}”</span>
                             </p>
+                            {% if report.mod == app.user %}
+                                {# Bouton pour clôturer quand on a fini #}
+                                <form action="{{ path('app_signalement_close', {'id': report.id}) }}" method="post" class="mt-4">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('close' ~ report.id) }}">
+                                    <button type="submit" class="text-sm font-bold text-green-600 hover:underline">Marquer comme traité</button>
+                                </form>
+                            {% endif %}
                             
-                            {# Bouton pour clôturer quand on a fini #}
-                            <form action="{{ path('app_signalement_close', {'id': report.id}) }}" method="post" class="mt-4">
-                                <input type="hidden" name="_token" value="{{ csrf_token('close' ~ report.id) }}">
-                                <button type="submit" class="text-sm font-bold text-green-600 hover:underline">Marquer comme traité</button>
-                            </form>
 
                         {% elseif report.status == 'En attente' or report.status == 'Non Traité' %}
                             <div class="flex flex-col items-end gap-3">

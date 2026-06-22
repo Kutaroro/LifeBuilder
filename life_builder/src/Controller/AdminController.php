@@ -21,6 +21,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\ByteString;
 
+
+#[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_MODERATOR")'))]
 final class AdminController extends AbstractController
 {
     #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_MODERATOR")'))]
@@ -79,7 +81,7 @@ final class AdminController extends AbstractController
 
     }
 
-    #[Route('/admin/signlement/{id}', name: 'app_admin_show')]
+    #[Route('/admin/signalement/{id}', name: 'app_admin_show')]
     public function show(Signalement $signalement): Response
     {   
 
@@ -119,7 +121,7 @@ final class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin_utilisateurs');
     }
 
-
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/mod/create', name: 'app_create_mod')]
     public function createAdmin(Request $request, Security $security ,EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
     {

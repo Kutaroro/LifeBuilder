@@ -23,10 +23,12 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/personnage')]
 final class PersonnageController extends AbstractController
 {
+    #[IsGranted('ROLE_USER')]
     #[Route('/index/{id}', name: 'app_personnage_index', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function index(
         PersonnageRepository $personnageRepository, 
@@ -117,6 +119,7 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_USER')]
     #[Route('/new', name: 'app_personnage_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {   
@@ -177,9 +180,19 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
+    #[Route('/non',name:"app_non")]
+    public function non(){
+
+        return ("NON");
+    }
+    
     #[Route('/{id}/{category}', name: 'app_personnage_show', methods: ['GET','POST'])]
     public function show(Request $request, Personnage $personnage, EntityManagerInterface $entityManager, FormFactoryInterface $formFactory, ?string $category = null): Response
     {   
+        if (!$personnage->IsPublic()){
+            return $this->redirectToRoute('app_non');
+        }
+
         // Trie des histoires par ordre d'affichage (Valeur nulle à la fin)
 
         if ($category) {
@@ -217,9 +230,15 @@ final class PersonnageController extends AbstractController
         $formReponse->handleRequest($request);
 
         if ($formReponse->isSubmitted() && $formReponse->isValid()) {
-            $parentID = $request->request->get('commentaireID'); 
-            $parent = $entityManager->getRepository(Commentaire::class)->find($parentID);
+            //$parentID = $request->request->get('commentaireID'); 
+            $parentID = $request->request->get('parent_id');
 
+            if (!$parentID) {
+                $this->addFlash('error', 'Action impossible : commentaire parent introuvable.');
+                return $this->redirectToRoute('app_personnage_show', ['id' => $personnage->getId()]);
+            }
+            $parent = $entityManager->getRepository(Commentaire::class)->find($parentID);
+            
             if ($parent) {
                 $mentionnedUser = $parent->getUtilisateur();
                 $reponseObj->setMentionedUtilisateur($mentionnedUser);
@@ -282,6 +301,7 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_USER')]
     #[Route('/{id}/edit/informations', name: 'app_personnage_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
     {   
@@ -293,11 +313,19 @@ final class PersonnageController extends AbstractController
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
         }
 
-        $tagsArray = $personnage->getTags() ?? [];
-        $catsArray = $personnage->getCategories() ?? [];
+        // On s'assure que $tags est bien un array (même vide) avant de faire le implode
+        $tags = $personnage->getTags();
+        if (!is_array($tags)) {
+            $tags = $tags ? [$tags] : []; // Si c'est une chaîne, on la met dans un tableau, sinon tableau vide
+        }
+
+        $categories = $personnage->getCategories();
+        if (!is_array($categories)) {
+            $categories = $categories ? [$categories] : [];
+        }
         $form = $this->createForm(PersonnageType::class, $personnage, [
-            'mapped_tags' => implode(',', $personnage->getTags()), // si tu as des tags
-            'mapped_categories' => implode(',', $personnage->getCategories()),
+            'mapped_tags' => implode(',', $tags),
+            'mapped_categories' => implode(',', $categories)
         ]);
         //$form = $this->createForm(PersonnageType::class, $personnage);
         $form->handleRequest($request);
@@ -352,6 +380,7 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_USER')]
     #[Route('/{id}', name: 'app_personnage_delete', methods: ['POST'])]
     public function delete(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
     {
@@ -374,6 +403,7 @@ final class PersonnageController extends AbstractController
 
 //================================= Méthodes persos =================================//
 
+    #[IsGranted('ROLE_USER')]
     #[Route('{id}/personnageLie/ajout', name: 'app_add_persoLie', methods: ['POST'])]
     public function addPersoLie(Request $request, EntityManagerInterface $em, Personnage $personnage): Response
     {

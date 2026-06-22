@@ -1,13 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit ModStatus{% endblock %}
+{% block title %}Modifier la Sanction{% endblock %}
 
 {% block body %}
-    <h1>Edit ModStatus</h1>
+{# Inclusion du header si nécessaire, calqué sur ta page admin #}
+{% if is_granted("ROLE_ADMIN") or (is_granted("ROLE_MODERATOR") and app.user.category == 'Utilisateur') %}
+    {{ include("admin/headerbis.html.twig") }}
+{% endif %}
 
-    {{ include('mod_status/_form.html.twig', {'button_label': 'Update'}) }}
+<main class="max-w-3xl mx-auto p-8 my-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+    
+    {# En-tête de la page #}
+    <div class="mb-8 border-b pb-4 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">Modifier la Sanction</h1>
+        <a href="{{ path('app_admin_utilisateurs') }}" class="text-sm font-medium text-gray-500 hover:text-black transition-all flex items-center gap-1">
+            ← Retour à la liste
+        </a>
+    </div>
 
-    <a href="{{ path('app_mod_status_index') }}">back to list</a>
+    {# Ton formulaire stylisé #}
+    <div class="mt-6">
+        {{ include('mod_status/_form.html.twig', {'button_label': 'Mettre à jour la sanction'}) }}
+    </div>
 
-    {{ include('mod_status/_delete_form.html.twig') }}
+    {# Zone de danger (Suppression) en bas de page #}
+    <div class="mt-12 pt-6 border-t border-dashed border-gray-200">
+        <p class="text-sm text-gray-500 mb-3 font-medium">Zone de danger</p>
+        {{ include('mod_status/_delete_form.html.twig') }}
+    </div>
+
+</main>
 {% endblock %}

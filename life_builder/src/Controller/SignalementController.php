@@ -27,7 +27,7 @@ final class SignalementController extends AbstractController
     //     ]);
     // }
     #[IsGranted("ROLE_USER")]
-    #[Route('/report/user={id}', name: 'app_signalement_user', methods: ['GET', 'POST'])]
+    #[Route('/report/?user={id}', name: 'app_signalement_user', methods: ['GET', 'POST'])]
     public function newReportUser(Request $request, EntityManagerInterface $entityManager,Utilisateur $utilisateur): Response
     {
 

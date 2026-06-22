@@ -45,6 +45,9 @@
                         {% endif %}
                         
                     </div>
+                    <div>
+                        <span> Auteur: <a href="{{path('app_utilisateur',{'id':personnage.utilisateur.id})}}" >{{personnage.utilisateur.nom}}</a></span>
+                    </div>
 
                     {# Section Catégories #}
                     <div class="flex flex-wrap gap-2 mt-4">

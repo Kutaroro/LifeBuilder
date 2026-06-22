@@ -40,6 +40,9 @@ class Signalement
     #[ORM\ManyToOne(inversedBy: 'signalements')]
     private ?Personnage $personnage = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $noteModeration = null; 
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,4 +157,24 @@ class Signalement
     }
 
 
+
+    /**
+     * Get the value of noteModeration
+     */ 
+    public function getNoteModeration()
+    {
+        return $this->noteModeration;
+    }
+
+    /**
+     * Set the value of noteModeration
+     *
+     * @return  self
+     */ 
+    public function setNoteModeration($noteModeration)
+    {
+        $this->noteModeration = $noteModeration;
+
+        return $this;
+    }
 }

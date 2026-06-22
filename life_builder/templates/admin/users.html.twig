@@ -49,18 +49,15 @@
                                         Modifier la catégorie
                                     </button> 
                                 {% endif %}
-                                <a href="{{path('app_sanction', {'id' : user.status.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                    Appliquer une sanction
-                                </a>
                                 <a href="{{path('app_mod_status_edit', {'id' : user.status.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                    Modifier une sanction
+                                    Appliquer ou modifier une sanction
                                 </a>
                                 {% if is_granted('ROLE_ADMIN') or (is_granted('ROLE_MODERATOR') and app.user.category == "Utilisateur") and 'ROLE_ADMIN' not in user.roles and 'ROLE_MODERATOR' not in user.roles %}  
-                                    <a href="{{path('app_utilisateur_edit', {'id' : user.status.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                    <a href="{{path('app_utilisateur_edit', {'id' : user.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                                         Modifier l'utilisateur
                                     </a>
                                     
-                                    <a href="{{path('app_utilisateur_delete', {'id' : user.status.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                    <a href="{{path('app_utilisateur_delete', {'id' : user.id})}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                                         Supprimer l'utilisateur (FAIS PAS CA FAUT QUE JE METTES UN IS_DELETED)
                                     </a>
                                     
@@ -150,11 +147,22 @@
                             {% endif %}
                         </div>
                     
-                        {% if user.status.status != "Pas de sanction en cours" %} 
+                        {# On vérifie qu'il y a bien une sanction ET que la date existe ET qu'elle est dans le futur #}
+                        {% if user.status.status|lower == "avertissement" %}   
                             <div class="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 bg-white">
-                                 {{ user.status.status }} - {{ user.status.type }} jusqu'au {{ user.status.dateFin|date('d/m/Y') }}
-                            </div>
+                                {{ user.status.status }} - {{ user.status.type }}
+                            </div> 
+                        {% else %}
+                            {% if user.status.status|lower != "pas de sanction en cours" 
+                            and user.status.dateFin is not null 
+                            and user.status.dateFin|date('Y-m-d') >= "now"|date('Y-m-d') %}      
+                                <div class="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 bg-white">
+                                    {{ user.status.status }} - {{ user.status.type }} jusqu'au {{ user.status.dateFin|date('d/m/Y') }}
+                                </div>
+                            {% endif %}
                         {% endif %}
+
+
                     </div>
                 </div>
             {% else %}
