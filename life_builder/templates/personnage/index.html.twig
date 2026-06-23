@@ -119,9 +119,7 @@
                                             Modifier le personnage
                                         </a>
                                         
-                                        <a href="{{path('app_personnage_delete', {'id' : personnage.id })}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
-                                            Supprimer le personnage
-                                        </a>
+                                        {{ include('personnage/_delete_form.html.twig') }}
                                         
                                                 
                             

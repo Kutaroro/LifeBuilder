@@ -404,9 +404,10 @@ final class PersonnageController extends AbstractController
     // }
 
     #[IsGranted('ROLE_USER')]
-    #[Route('/{id}', name: 'app_personnage_delete', methods: ['POST'])]
+    #[Route('/delete/character/{id}', name: 'app_personnage_delete', methods: ['POST'])]
     public function delete(Request $request, Personnage $personnage, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        
         $utilisateur = $personnage->getUtilisateur();
         $currentUser = $this->getUser();
 
@@ -415,15 +416,17 @@ final class PersonnageController extends AbstractController
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce personnage.");
         }
 
-        if ($this->isCsrfTokenValid('delete'.$personnage->getId(), $request->getPayload()->getString('_token'))) {
-            
+        $submittedToken = $request->request->get('_token');
+
+        if ($this->isCsrfTokenValid('delete'.$personnage->getId(), $submittedToken)) {
             $personnage->setIsDeleted(true);
             $entityManager->flush();
             
             $this->addFlash('success', 'Le personnage a bien été supprimé.');
+        } else {
+            $this->addFlash('error', 'Le jeton de sécurité (CSRF) est invalide ou absent.');
         }
 
-       
         return $this->redirectToRoute('app_personnage_index', ['id' => $utilisateur->getId()], Response::HTTP_SEE_OTHER);
     }
 

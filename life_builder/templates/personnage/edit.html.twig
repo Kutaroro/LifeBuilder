@@ -13,12 +13,12 @@
             </p>
         </div>
 
-        {# On réutilise le même formulaire #}
+       
         {{ include('personnage/_form.html.twig') }}
 
         <div class="mt-6 flex justify-between items-center border-t pt-6">
-            <a href="{{ path('app_personnage_index',{'id': personnage.id}) }}" class="text-gray-500 hover:text-black text-sm transition-colors">
-                ← Retour à la liste
+            <a href="{{ path('app_personnage_show',{'id': personnage.id}) }}" class="text-gray-500 hover:text-black text-sm transition-colors">
+                ← Retour au personnage
             </a>
         </div>
     </div>
@@ -60,7 +60,7 @@ function initForm() {
             hiddenInput.value = labels.join(',');
         }
 
-        // --- ÉTAPE CRUCIALE : CHARGER LES TAGS EXISTANTS ---
+        // ---  CHARGER LES TAGS EXISTANTS ---
         if (hiddenInput.value) {
             const existingTags = hiddenInput.value.split(',');
             existingTags.forEach(tag => {
