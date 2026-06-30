@@ -68,11 +68,17 @@
                         </div>
                     {% endfor %}
                 </div>
-            </div>
-            {# Navigation Swiper personnalisée façon image #}
-            <div class="swiper-button-prev !text-black after:!text-xl bg-white w-12 h-12 rounded-full shadow-lg !-left-4"></div>
-            <div class="swiper-button-next !text-black after:!text-xl bg-white w-12 h-12 rounded-full shadow-lg !-right-4"></div>
+            {# Optionnel : si tu veux ajouter les petits ronds de pagination en bas #}
+            <div class="swiper-pagination"></div>
         </div>
+
+        {# Flèches#}
+        <button class="swiper-button-prev !absolute top-1/2 -translate-y-1/2 !left-2 md:!-left-4 z-20 bg-white text-black w-12 h-12 rounded-full shadow-lg flex items-center justify-center font-bold text-xl after:hidden hover:bg-gray-100 transition-all">
+            &#10094;
+        </button>
+        <button class="swiper-button-next !absolute top-1/2 -translate-y-1/2 !right-2 md:!-right-4 z-20 bg-white text-black w-12 h-12 rounded-full shadow-lg flex items-center justify-center font-bold text-xl after:hidden hover:bg-gray-100 transition-all">
+            &#10095;
+        </button>
     </section>
 
     {# SECTION LES PETITS NOUVEAUX (Liste) #}
@@ -117,9 +123,22 @@
 
 
 <script>
+    function initSwiper() {
+       
+        const swiperElement = document.querySelector('.swiper-perso');
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const swiperPerso = new Swiper(".swiper-perso", {
+        //  Si l'élément n'existe pas sur cette page, on arrête tout proprement (ça evite des message consoles en boucle)
+        if (!swiperElement) {
+            return;
+        }
+
+        // Si l'élément existe mais qu'il est déjà initialisé, on arrête aussi (de même)
+        if (swiperElement.swiper) {
+            return;
+        }
+
+        // On initialise  en utilisant directement l'élément trouvé
+        const swiperPerso = new Swiper(swiperElement, {
             slidesPerView: 1, 
             spaceBetween: 20,
             navigation: {
@@ -130,11 +149,12 @@
                 el: ".swiper-pagination",
                 clickable: true,
             },
-            breakpoints: {
-                    640: { slidesPerView: 1 },
-                    1024: { slidesPerView: 1 },
-                },
         });
-    });
+    }
+
+    // On écoute les chargements
+    document.addEventListener('DOMContentLoaded', initSwiper);
+    document.addEventListener('turbo:load', initSwiper);
 </script>
+
 {% endblock %}

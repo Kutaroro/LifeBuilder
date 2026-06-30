@@ -73,14 +73,22 @@ public function findTopPopulaires(int $limit ): array
 
 
 
-public function findByFilters(int $uId, ?string $search, ?string $cat, ?string $tag): array
+public function findByFilters(int $uId, ?int $currentUserId, ?string $search, ?string $cat, ?string $tag): array
 {
     $em = $this->getEntityManager();
     $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($em);
     $rsm->addRootEntityFromClassMetadata(Personnage::class, 'p');
 
-    $sql = 'SELECT p.* FROM personnage p WHERE p.utilisateur_id = :uId AND p.is_deleted = false'; ;
-    $params = ['uId' => $uId];
+    // On ne récupère que les personnages de l'utilisareur ou ceux qui sont puclics, et on exclut les personnages supprimés
+    $sql = 'SELECT p.* FROM personnage p 
+            WHERE p.utilisateur_id = :uId 
+            AND p.is_deleted = false
+            AND (p.is_public = true OR :currentUserId = :uId)'; 
+            
+    $params = [
+        'uId' => $uId,
+        'currentUserId' => $currentUserId
+    ];
 
     // 1. Recherche globale
     if ($search) {
@@ -88,10 +96,8 @@ public function findByFilters(int $uId, ?string $search, ?string $cat, ?string $
         $params['search'] = "%$search%";
     }
 
-    // 2. Recherche par catégorie (avec conversion JSONB pour l'opérateur ?)
+    // 2. Recherche par catégorie
     if ($cat) {
-        // Le cast ::jsonb permet d'utiliser l'opérateur ?
-        // On double le ? (??) pour que Doctrine ne le confonde pas avec un paramètre
         $sql .= ' AND p.categories::jsonb ?? :cat';
         $params['cat'] = $cat;
     }
@@ -106,6 +112,19 @@ public function findByFilters(int $uId, ?string $search, ?string $cat, ?string $
 }
 
 
+public function findPublicPersonnages(int $excludedId): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isPublic = :public')
+            ->andWhere('p.isDeleted = :isDeleted')
+            ->andWhere('p.id != :id')
+            ->setParameter('public', true)
+            ->setParameter('isDeleted', false)
+            ->setParameter('id', $excludedId)
+            ->orderBy('p.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
 
 public function findAllPublicByFilters(?string $search, ?string $cat, ?string $tag): array

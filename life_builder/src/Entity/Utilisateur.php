@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -22,6 +23,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\Email(
+        message: "L'adresse email '{{ value }}' n'est pas un email valide."
+    )]
     private ?string $email = null;
 
     /**
@@ -88,7 +92,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Signalement>
      */
     #[ORM\OneToMany(targetEntity: Signalement::class, mappedBy: 'reportedBy')]
-    private Collection $signalementsEffectués;
+    private Collection $signalementsEffectués; 
+    // A transferer sur les classes modérateur et administrateur ??
+    // ou garder ici puisque les deux hérite de cette classe
 
     public function __construct()
     {

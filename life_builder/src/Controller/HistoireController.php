@@ -26,7 +26,7 @@ final class HistoireController extends AbstractController
     // }
     #[Route(path:'/histoires/{id}', name: 'app_histoire_index_personnage', methods: ['GET'])]
     public function index(HistoireRepository $histoireRepository, int $id): Response
-    {
+    {   
         $personnageHistoires = $histoireRepository->findBy(['personnage' => $id]);
         return $this->render('histoire/index.html.twig', [
             'histoires' => $personnageHistoires,
@@ -62,7 +62,15 @@ final class HistoireController extends AbstractController
 
     #[Route('/{id}/edit/', name: 'app_histoire_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Histoire $histoire, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        $utilisateur = $histoire->getPersonnage()->getUtilisateur();
+        $currentUser = $this->getUser();
+
+        // Sécurité : Accès refusé si ce n'est pas son personnage et qu'on n'est pas admin
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
+
         $form = $this->createForm(HistoireType::class, $histoire);
         $form->handleRequest($request);
 
@@ -71,7 +79,7 @@ final class HistoireController extends AbstractController
 
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_histoire_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_show_histoire', ['id'=>$histoire->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('histoire/edit.html.twig', [
@@ -83,12 +91,20 @@ final class HistoireController extends AbstractController
     #[Route('/{id}', name: 'app_histoire_delete', methods: ['POST'])]
     public function delete(Request $request, Histoire $histoire, EntityManagerInterface $entityManager): Response
     {
+        $utilisateur = $histoire->getPersonnage()->getUtilisateur();
+        $currentUser = $this->getUser();
+
+        // Sécurité : Accès refusé si ce n'est pas son personnage et qu'on n'est pas admin
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
+
         if ($this->isCsrfTokenValid('delete'.$histoire->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($histoire);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_personnage_show', ['id'=>$histoire->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_show_histoire', ['id'=>$histoire->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
     }
 
 

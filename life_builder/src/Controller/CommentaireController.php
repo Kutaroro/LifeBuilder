@@ -149,7 +149,19 @@ final class CommentaireController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_commentaire_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        $utilisateur = $commentaire->getUtilisateur();
+        $currentUser = $this->getUser();
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_MODERATOR')) {
+            if ($currentUser->getRoles() === ['ROLE_MODERATOR']) {
+                if ($currentUser->getCategory() != 'Utilisateur')
+                {
+               
+                throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce commentaire.");
+                }
+            }
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce commentaire.");
+        }
         $form = $this->createForm(CommentaireType::class, $commentaire);
         $form->handleRequest($request);
 
@@ -167,7 +179,18 @@ final class CommentaireController extends AbstractController
 
     #[Route('/{id}', name: 'app_commentaire_delete', methods: ['POST'])]
     public function delete(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        $utilisateur = $commentaire->getUtilisateur();
+        $currentUser = $this->getUser();
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_MODERATOR')) {
+            if ($currentUser->getRoles() === ['ROLE_MODERATOR']) {
+                if ($currentUser->getCategory() === 'Utilisateur')
+                {
+               
+                throw $this->createAccessDeniedException("Vous n'avez pas le droit de supprimer ce commentaire.");
+                }
+            }
+        }
         if ($this->isCsrfTokenValid('delete'.$commentaire->getId(), $request->getPayload()->getString('_token'))) {
             foreach ($commentaire->getReponses() as $reponse) {
                 $entityManager->remove($reponse);
@@ -176,6 +199,6 @@ final class CommentaireController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_personnage_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_personnage_index', ['id' => $commentaire->getUtilisateur()->getId()], Response::HTTP_SEE_OTHER);
     }
 }

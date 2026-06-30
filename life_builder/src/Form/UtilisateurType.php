@@ -6,6 +6,7 @@ use App\Entity\ModStatus;
 use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -19,7 +20,9 @@ class UtilisateurType extends AbstractType
     {
         $builder
             ->add('nom')
-            ->add('email')
+            ->add('email', EmailType::class, [
+                'label' => 'Votre adresse email',
+            ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,

@@ -6,7 +6,9 @@ use App\Repository\HistoireRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-
+use ApiPlatform\Metadata\ApiResource;
+ 
+#[ApiResource]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: HistoireRepository::class)]
 class Histoire

@@ -32,8 +32,8 @@ final class UtilisateurController extends AbstractController
         
         $currentUser = $this->getUser();
 
-       // Si on veux modifier un profil qui n'est pas le sien et qu'on est pas admin ou mod user, accès refusé
-        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_MODERATOR')) {
+       // Si on veut modifier un profil qui n'est pas le sien et qu'on est pas admin ou mod user, accès refusé
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce profil.");
         }    
         
@@ -61,7 +61,7 @@ final class UtilisateurController extends AbstractController
             $newPassword = $form->get('password')->getData();
 
             if (!empty($newPassword)) {
-                //Si on remplis le champ mot de passe, on le hash et on le met à jour
+                //Si on mets un mot de passe, on le hash et on le met à jour
                 $hashedPassword = $passwordHasher->hashPassword($utilisateur, $newPassword);
                 $utilisateur->setPassword($hashedPassword);
             }

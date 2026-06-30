@@ -68,7 +68,15 @@ final class ApparenceController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_apparence_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Apparence $apparence, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        $utilisateur = $apparence->getPersonnage()->getUtilisateur();
+        $currentUser = $this->getUser();
+
+        // Sécurité : Accès refusé si ce n'est pas son personnage et qu'on n'est pas admin
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
+
         $form = $this->createForm(ApparenceType::class, $apparence);
         $form->handleRequest($request);
 
@@ -93,7 +101,7 @@ final class ApparenceController extends AbstractController
             $apparence->setModifiedAt(new DateTimeImmutable());
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_apparence_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_show_apparence', ['id' => $apparence->getPersonnage()->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('apparence/edit.html.twig', [
@@ -104,7 +112,15 @@ final class ApparenceController extends AbstractController
 
     #[Route('/{id}', name: 'app_apparence_delete', methods: ['POST'])]
     public function delete(Request $request, Apparence $apparence, EntityManagerInterface $entityManager): Response
-    {
+    {   
+        $utilisateur = $apparence->getPersonnage()->getUtilisateur();
+        $currentUser = $this->getUser();
+
+        // Sécurité : Accès refusé si ce n'est pas son personnage et qu'on n'est pas admin
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
+
         if ($this->isCsrfTokenValid('delete'.$apparence->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($apparence);
             $entityManager->flush();
@@ -114,7 +130,7 @@ final class ApparenceController extends AbstractController
     }
 
 
-    #[Route('{id}/apparence/', name: 'app_show_apparence', methods: ['GET','POST'])]
+    #[Route('/{id}/apparence/', name: 'app_show_apparence', methods: ['GET','POST'])]
     public function showApparence(Personnage $personnage, Request $request,EntityManagerInterface $entityManager, ApparenceRepository $apparenceRepository ): Response
     {   
         $apparences=$personnage->getApparences()->toArray();

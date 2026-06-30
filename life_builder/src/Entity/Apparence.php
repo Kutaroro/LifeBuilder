@@ -5,7 +5,9 @@ namespace App\Entity;
 use App\Repository\ApparenceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-
+use ApiPlatform\Metadata\ApiResource;
+ 
+#[ApiResource]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ApparenceRepository::class)]
 class Apparence

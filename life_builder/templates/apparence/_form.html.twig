@@ -22,6 +22,11 @@
                     'class': 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-black file:text-white hover:file:bg-gray-800 cursor-pointer'
                 }
             }) }}
+            {% if form_errors(form.images) %}
+                <div class="text-red-500 text-sm mt-2 font-medium">
+                    {{ form_errors(form.images) }}
+                </div>
+            {% endif %}
         </div>
 
         {# Champ Description #}

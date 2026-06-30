@@ -34,7 +34,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             <span class="font-medium">Ajouter une apparence</span>
                         </button>
-                        <div id="form-ajout-apparence" class="hidden">
+                        <div id="form-ajout-apparence" class="{{ form is defined and not form.vars.valid ? '' : 'hidden' }} w-full max-w-2xl mx-auto mt-4">
                             {{ include('apparence/_form.html.twig', {'button_label': 'Créer'}) }}
                         </div>
                     {% endif %}

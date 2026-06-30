@@ -58,6 +58,11 @@
                         {% endif %}
                     </div>
                 </div>
+                {% if form_errors(form.image) %}
+                    <div class="text-red-500 text-sm mt-2 font-medium">
+                        {{ form_errors(form.image) }}
+                    </div>
+                {% endif %}
      
             </div>
 
@@ -68,6 +73,11 @@
                     <span class="text-gray-500 text-sm">Cliquer pour ajouter des images</span>
                     {{ form_widget(form.imagesSecondaires, {'attr': {'class': 'gallery-preview-input hidden', 'accept': 'image/*', 'multiple': 'multiple'}}) }}
                 </label>
+                {% if form_errors(form.imagesSecondaires) %}
+                    <div class="text-red-500 text-sm mt-2 font-medium">
+                        {{ form_errors(form.imagesSecondaires) }}
+                    </div>
+                {% endif %}
                 <div id="gallery-preview" class="flex flex-wrap gap-3 mt-4">
                 {# Affichage des images déjà enregistrées en base #}
                 {% if personnage is defined and personnage.imagesSecondaires %}

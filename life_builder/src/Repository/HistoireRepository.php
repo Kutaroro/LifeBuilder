@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Histoire;
+use App\Entity\Personnage;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -30,6 +31,35 @@ class HistoireRepository extends ServiceEntityRepository
                ->getResult()
            ;
        }
+
+
+    public function findDistinctCategoriesByPersonnage(Personnage $personnage): array
+    {
+        return $this->createQueryBuilder('h')
+            ->select('DISTINCT h.categorie')
+            ->where('h.personnage = :p')
+            ->andWhere('h.categorie IS NOT NULL')
+            ->andWhere("h.categorie != ''")
+            ->setParameter('p', $personnage)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Récupère toutes les histoires d'un personnage ordonnées par position d'affichage
+     * * @param Personnage $personnage
+     * @return Histoire[]
+     */
+    public function findByPersonnageOrdered(Personnage $personnage): array
+    {
+        return $this->createQueryBuilder('h')
+            ->andWhere('h.personnage = :p')
+            ->setParameter('p', $personnage)
+            ->orderBy('h.ordreAffichage', 'ASC')
+            ->addOrderBy('h.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
     //    /**
     //     * @return Histoire[] Returns an array of Histoire objects

@@ -153,6 +153,11 @@
                                 {{ user.status.status }} - {{ user.status.type }}
                             </div> 
                         {% else %}
+                            {% if user.status.status|lower == "bannissement définitif" %}   
+                            <div class="px-4 py-2 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 bg-white">
+                                {{ user.status.status }}
+                            </div> 
+                            {% endif %}
                             {% if user.status.status|lower != "pas de sanction en cours" 
                             and user.status.dateFin is not null 
                             and user.status.dateFin|date('Y-m-d') >= "now"|date('Y-m-d') %}      

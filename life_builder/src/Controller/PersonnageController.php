@@ -27,26 +27,44 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/personnage')]
 final class PersonnageController extends AbstractController
-{
+{   
+    private $personnageRepository;
+    private $histoireRepository;
+    public function __construct(PersonnageRepository $personnageRepository, HistoireRepository $histoireRepository)
+    {
+        $this->personnageRepository = $personnageRepository;
+        $this->histoireRepository = $histoireRepository;
+    }
+
     #[IsGranted('ROLE_USER')]
     #[Route('/index/{id}', name: 'app_personnage_index', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function index(
-        PersonnageRepository $personnageRepository, 
-        Utilisateur $utilisateur, 
+        Utilisateur $utilisateur,
         Request $request
     ): Response {   
-        // On récupère TOUT via $request->query (le contenu après le ?)
         $search = $request->query->get('search');
         $categorie = $request->query->get('category');
         $tag = $request->query->get('tag');
 
-        // Le reste de ta logique est bonne
-        $personnages = $personnageRepository->findByFilters($utilisateur->getId(), $search, $categorie, $tag);      
         
-        $allPersos = $personnageRepository->findBy(['utilisateur' => $utilisateur]);
+        $currentUser = $this->getUser(); 
+
+        // On récupère les personnages de l'utilisateur. 
+        // Pour le moment tous les personnages sont récupérés,
+        // mais par la suite ceux qui sont supprimés seront ignoré
+        $personnages = $this->personnageRepository->findByFilters(
+            $utilisateur->getId(), 
+            $currentUser ? $currentUser->getId() : null,
+            $search, 
+            $categorie, 
+            $tag
+        );    
+        
+        $allPersos = $this->personnageRepository->findBy(['utilisateur' => $utilisateur]);
         $categoriesDispo = [];
         $tagsDispo = [];
 
+        // On récuprèe tous les tags et catégories des personnages.
         foreach ($allPersos as $p) {
             $categoriesDispo = array_merge($categoriesDispo, $p->getCategories() ?? []);
             $tagsDispo = array_merge($tagsDispo, $p->getTags() ?? []);
@@ -61,56 +79,15 @@ final class PersonnageController extends AbstractController
             'activeTag' => $tag
         ]);
     }
-    //     $personnages = $personnageRepository->findBy(
-    //         ['utilisateur' => $utilisateur],
-    //     );
-
-    //     $query = $request->query->get('search');
-
-    //     if ($query) {
-    //         if ($query) {
-           
-    //         $personnages = $personnageRepository->searchByKeyword($query, $utilisateur->getId());
-    //         }
-    //     }
-
-    //     // Extraction propre des catégories et tags uniques depuis la liste des personnages
-    //     $categories = [];
-    //     $tags = [];
-
-    //     foreach ($personnages as $p) {
-    //         if ($p->getCategories()) {
-    //             $categories = array_merge($categories, $p->getCategories());
-    //         }
-    //         if ($p->getTags()) {
-    //             $tags = array_merge($tags, $p->getTags());
-    //         }
-    //     }     
-    //     return $this->render('personnage/index.html.twig', [
-    //         'personnages' => $personnages,
-    //         'categories' => array_unique(array_filter($categories)),
-    //         'tags' => array_unique(array_filter($tags)),
-    //     ]);
-    
 
     #[Route('/catalogue', name: 'app_personnage_catalogue', methods: ['GET'])]
-    public function catalogue(PersonnageRepository $personnageRepository,Request $request): Response
+    public function catalogue(Request $request): Response
     {   
-        //$personnages = $personnageRepository->findAll();
-
-        
-        // $personnagesPublics = $personnageRepository
-        //     ->createQueryBuilder('p')
-        //     ->andWhere('p.isPublic = :public')
-        //     ->setParameter('public', true)
-        //     ->orderBy('p.nom', 'ASC')
-        //     ->getQuery()
-        //     ->getResult();
 
         $search = $request->query->get('search');
         $categorie = $request->query->get('category');
         $tag = $request->query->get('tag');
-        $personnagesPublics = $personnageRepository->findAllPublicByFilters($search, $categorie, $tag);      
+        $personnagesPublics = $this->personnageRepository->findAllPublicByFilters($search, $categorie, $tag);      
 
 
         return $this->render('personnage/catalogue.html.twig', [
@@ -130,6 +107,8 @@ final class PersonnageController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $personnage->setUtilisateur($this->getUser());
             $file=$form->get('image')->getData();
+
+            //gestion des images
             if ($file) {
                 $newFilename = uniqid().'.'.$file->guessExtension();
 
@@ -158,7 +137,7 @@ final class PersonnageController extends AbstractController
             $personnage->setCreatedAt(new DateTimeImmutable());
             $personnage->setModifiedAt(new DateTimeImmutable());
 
-            // Dans ton Contrôleur
+            //récupération categories and tag, transformation en array 
             $catData = $form->get('categories_hidden')->getData();
             if ($catData) {
                 $personnage->setCategories(array_filter(array_map('trim', explode(',', $catData))));
@@ -180,7 +159,7 @@ final class PersonnageController extends AbstractController
         ]);
     }
 
-    #[Route('/non',name:"app_non")]
+    #[Route('/non',name:"app_non")] // A effacer mais verifier qu'il n'y ai plus de code qui utilise ça sans lever d'exception
     public function non(){
 
         return ("NON");
@@ -256,27 +235,8 @@ final class PersonnageController extends AbstractController
         }
             
 
-        $personnagesPublics = $entityManager->getRepository(Personnage::class)
-            ->createQueryBuilder('p')
-            ->andWhere('p.isPublic = :public')
-            ->andWhere('p.isDeleted = :isDeleted')
-            ->andWhere('p.id != :id')
-            ->setParameter('public', true)
-            ->setParameter('isDeleted', false)
-            ->setParameter('id', $personnage->getId())
-            ->orderBy('p.nom', 'ASC')
-            ->getQuery()
-            ->getResult();
-
-        $categories = $entityManager->getRepository(Histoire::class)
-            ->createQueryBuilder('h')
-            ->select('DISTINCT h.categorie')
-            ->where('h.personnage = :p')
-            ->andWhere('h.categorie IS NOT NULL') 
-            ->andWhere("h.categorie != ''")      
-            ->setParameter('p', $personnage)
-            ->getQuery()
-            ->getResult();
+        $personnagesPublics = $this->personnageRepository->findPublicPersonnages($personnage->getId());
+        $categories = $this->histoireRepository->findDistinctCategoriesByPersonnage($personnage);
 
         usort($histoires, function($a, $b) { //Trie un tableau en utilisant une fonction de comparaison
             $av = $a->getOrdreAffichage() ?? PHP_INT_MAX;
@@ -311,7 +271,7 @@ final class PersonnageController extends AbstractController
         $utilisateur = $personnage->getUtilisateur();
         $currentUser = $this->getUser();
 
-       // Si on veux modifier un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
+       // Si on veut modifier un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
         if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
         }
@@ -330,12 +290,11 @@ final class PersonnageController extends AbstractController
             'mapped_tags' => implode(',', $tags),
             'mapped_categories' => implode(',', $categories)
         ]);
-        //$form = $this->createForm(PersonnageType::class, $personnage);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // ÉTAPE B : Récupérer les chaînes envoyées par le JS et les retransformer en TABLEAUX
+            // Récupérer les chaînes envoyées par le JS et les retransformer en tableaux
             $tagsString = $form->get('tags_hidden')->getData();
             $catsString = $form->get('categories_hidden')->getData();
 
@@ -434,9 +393,18 @@ final class PersonnageController extends AbstractController
 //================================= Méthodes persos =================================//
 
     #[IsGranted('ROLE_USER')]
-    #[Route('{id}/personnageLie/ajout', name: 'app_add_persoLie', methods: ['POST'])]
+    #[Route('/{id}/personnageLie/ajout', name: 'app_add_persoLie', methods: ['POST'])]
     public function addPersoLie(Request $request, EntityManagerInterface $em, Personnage $personnage): Response
-    {
+    {   
+
+        $utilisateur = $personnage->getUtilisateur();
+        $currentUser = $this->getUser();
+
+        // Sécurité : Accès refusé si ce n'est pas son personnage et qu'on n'est pas admin
+        if ($currentUser !== $utilisateur && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
+
         $persoLieId = $request->request->getInt('persoLies');     // ID du personnage lié sélectionné
         $personnageLi = $em->getRepository(Personnage::class)->findOneBy(['id' => $persoLieId]);
 
@@ -470,10 +438,10 @@ final class PersonnageController extends AbstractController
 
     }
     //Permet de reorganiser la liste si l'utilisateur change l'ordre d'affichage 
-    public function reorganisation(Personnage $personnage, HistoireRepository $histoireRepository, EntityManagerInterface $em): void
+    public function reorganisation(Personnage $personnage, EntityManagerInterface $em): void
     {
         // normalise les ordres existants et retire les nulls en fin
-        $items = $histoireRepository
+        $items = $this->histoireRepository
             ->createQueryBuilder('e')
             ->andWhere('e.personnage = :p')
             ->setParameter('p', $personnage)
@@ -492,10 +460,10 @@ final class PersonnageController extends AbstractController
     }
 
     //Jsp comment faire une fonction pour les deux donc copier coller :(
-    public function reorganisationA(Personnage $personnage, HistoireRepository $histoireRepository, EntityManagerInterface $em): void
+    public function reorganisationA(Personnage $personnage, EntityManagerInterface $em): void
     {
         // normalise les ordres existants et retire les nulls en fin
-        $items = $histoireRepository
+        $items = $this->histoireRepository
             ->createQueryBuilder('e')
             ->andWhere('e.personnage = :p')
             ->setParameter('p', $personnage)
@@ -523,29 +491,25 @@ final class PersonnageController extends AbstractController
         int $personnageId,
         int $histoireId,
         Request $request,
-        PersonnageRepository $personnageRepository,
-        HistoireRepository $histoireRepository,
         EntityManagerInterface $entityManager
     ): Response {
-        $personnage = $personnageRepository->findOneBy(['id' => $personnageId]);
+
+        $personnage = $this->personnageRepository->findOneBy(['id' => $personnageId]);
         if (!$personnage) {
             throw $this->createNotFoundException('Personnage not found');
         }
 
-        $histoire = $histoireRepository->find($histoireId);
+        $histoire = $this->histoireRepository->find($histoireId);
         if (!$histoire) {
             throw $this->createNotFoundException('Histoire not found');
         }
-
+        $currentUser = $this->getUser();
+        // Si on veut modifier un personnage qui n'est pas le sien et qu'on est pas admin, accès refusé
+        if ($currentUser !== $personnage->getUtilisateur() && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier ce personnage.");
+        }
         // Récupère toutes les histoires du personnage, ordonnées par ordreAffichage (nulls en fin)
-        $all = $histoireRepository
-            ->createQueryBuilder('e')
-            ->andWhere('e.personnage = :p')
-            ->setParameter('p', $personnage)
-            ->orderBy('e.ordreAffichage', 'ASC')
-            ->addOrderBy('e.id', 'ASC')
-            ->getQuery()
-            ->getResult();
+        $all = $this->histoireRepository->findByPersonnageOrdered($personnage);
 
         // retire l'élément courant de la liste si présent
         $list = [];
@@ -554,16 +518,17 @@ final class PersonnageController extends AbstractController
                 $list[] = $it;
             }
         }
-
         // calcule la position demandée et la borne entre 1 et count(list)+1
         $requested = $request->request->getInt('ordreAffichage', 1);
         $maxPos = count($list) + 1;
         $pos = max(1, min($requested, $maxPos)); // position 1..maxPos
 
         // insère l'élément à la position voulue (index pos-1)
+        // Attention au nombre et à la position des paramètres sinon
+        // array_slice() peut modifier la liste de manière inattendue
         array_splice($list, $pos - 1, 0, [$histoire]);
 
-        // réattribue des ordreAffichage séquentiels commençant à 1
+        // réattribue des nouveaux ordreAffichage commençant à 1
         $i = 1;
         foreach ($list as $it) {
             $it->setOrdreAffichage($i);
@@ -584,11 +549,10 @@ final class PersonnageController extends AbstractController
         int $personnageId,
         int $apparenceId,
         Request $request,
-        PersonnageRepository $personnageRepository,
         ApparenceRepository $apparenceRepository,
         EntityManagerInterface $entityManager
     ): Response {
-        $personnage = $personnageRepository->find($personnageId);
+        $personnage = $this->personnageRepository->find($personnageId);
         if (!$personnage) {
             throw $this->createNotFoundException('Personnage not found');
         }
